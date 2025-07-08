@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}ホーム - 推しメシ{% endblock %}
+{% block content %}
+    <h1>みんなの推しメシ！</h1>
+    
+    <div class="posts-container">
+        {% for post in posts %}
+            <div class="post-card">
+                {% if post.image_path %}
+                    <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
+                {% endif %}
+                <div class="post-content">
+                    <h3>{{ post.store_name }}</h3>
+                    <div class="post-meta">
+                        <strong>📍 地域:</strong> {{ post.area }} | 
+                        <strong>💰 価格帯:</strong> {{ post.price_range }} | 
+                        <strong>👤 投稿者:</strong> {{ post.username }}
+                        {% if post.school %} | <strong>🏫 高校:</strong> {{ post.school }}{% endif %}
+                    </div>
+                    <div class="post-caption">{{ post.caption }}</div>
+                    <div class="post-actions">
+                        <button type="button" class="like-button{% if post.id in liked_posts %} liked{% endif %}" data-post-id="{{ post.id }}">
+                            <span class="heart-icon">{% if post.id in liked_posts %}❤️{% else %}🤍{% endif %}</span>
+                            <span class="like-count">{{ post.like_count }}</span>
+                        </button>
+                        
+                        {% if session.is_admin %}
+                            <form method="POST" action="{{ url_for('admin_delete_post', post_id=post.id) }}" 
+                                  style="display: inline-block; margin-left: 10px;"
+                                  onsubmit="return confirm('この投稿を削除してもよろしいですか？');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="delete-button">🗑️削除</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p>まだ投稿がありません。</p>
+        {% endfor %}
+    </div>
+{% endblock %}

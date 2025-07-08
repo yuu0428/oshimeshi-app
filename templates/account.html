@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+{% block title %}マイページ{% endblock %}
+{% block content %}
+    <h1>マイページ</h1>
+    <p>ようこそ、<strong>{{ session.username or 'ゲスト' }}</strong> さん！ 🎉</p>
+    
+    {% if session.is_admin %}
+        <div style="background-color: #fff3cd; padding: 1em; border-radius: 5px; margin-bottom: 1em; border: 1px solid #ffeeba;">
+            <h3>🔧 管理者機能</h3>
+            {% if session.is_advertiser %}
+                <p>あなたは<strong>管理者 兼 広告アカウント</strong>としてログイン中です。</p>
+                <div style="background-color: #d4edda; padding: 0.5em; border-radius: 3px; margin-bottom: 1em; border: 1px solid #c3e6cb;">
+                    <small>📢 広告アカウント権限が有効です</small>
+                </div>
+            {% else %}
+                <p>あなたは管理者権限を持っています。</p>
+            {% endif %}
+            
+            <!-- 管理者の名前変更フォーム -->
+            <h4>ユーザー名の変更</h4>
+            <form method="post" action="{{ url_for('update_admin_username') }}" style="margin-bottom: 1em;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" name="new_username" placeholder="新しいユーザー名" value="{{ session.username or '' }}" maxlength="50" style="flex: 1;">
+                    <button type="submit" onclick="return confirm('ユーザー名を変更しますか？');">変更</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 1em; padding-top: 1em; border-top: 1px solid #ffeeba;">
+                <form method="post" action="{{ url_for('privileged_logout') }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" onclick="return confirm('管理者権限からログアウトしますか？');" 
+                            style="background-color: #dc3545; color: white; padding: 0.5em 1em; border: none; border-radius: 4px; cursor: pointer;">
+                        🚪 権限者ログアウト
+                    </button>
+                </form>
+                <small style="display: block; margin-top: 0.5em; color: #666;">
+                    ※ログアウト後もユーザー名と投稿履歴は保持されます
+                </small>
+            </div>
+            
+            <p><small>※管理者は投稿画面で全ての投稿を削除できます。</small></p>
+        </div>
+    {% else %}
+        <!-- 控えめな管理者ログインボタン -->
+        <div style="text-align: right; margin-bottom: 1em;">
+            <button type="button" id="adminLoginBtn" style="background-color: #6c757d; color: white; padding: 0.3em 0.6em; font-size: 0.8em; border: none; border-radius: 3px; cursor: pointer;">🔐 Admin</button>
+        </div>
+
+        <!-- モーダル背景 -->
+        <div id="adminModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+            <!-- モーダルコンテンツ -->
+            <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border-radius: 8px; width: 400px; max-width: 90%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">🔐 管理者権限の取得</h3>
+                    <button type="button" id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">&times;</button>
+                </div>
+                <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">管理者パスワードを入力してください。</p>
+                <form method="post" action="{{ url_for('admin_login') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div style="margin-bottom: 15px;">
+                        <input type="password" name="admin_password" placeholder="管理者パスワード" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="text-align: right;">
+                        <button type="button" id="cancelBtn" style="background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">キャンセル</button>
+                        <button type="submit" style="background-color: #5cb85c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">ログイン</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // モーダル表示・非表示の制御
+            document.getElementById('adminLoginBtn').addEventListener('click', function() {
+                document.getElementById('adminModal').style.display = 'block';
+                document.querySelector('#adminModal input[name="admin_password"]').focus();
+            });
+
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('adminModal').style.display = 'none';
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('adminModal').style.display = 'none';
+            });
+
+            // モーダル背景クリックで閉じる
+            document.getElementById('adminModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+
+            // Escキーで閉じる
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('adminModal').style.display === 'block') {
+                    document.getElementById('adminModal').style.display = 'none';
+                }
+            });
+        </script>
+    {% endif %}
+    
+    <h2>あなたの投稿履歴 📝</h2>
+    <div class="posts-container">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="post-card">
+                    {% if post.image_path %}
+                        <img src="{{ url_for('static', filename=post.image_path) }}" alt="店舗画像" class="post-image">
+                    {% endif %}
+                    <div class="post-content">
+                        <h3>{{ post.store_name }}</h3>
+                        <p class="post-meta">
+                            📍 地域: {{ post.area }} | 💰 価格帯: {{ post.price_range }}
+                            {% if post.school %} | 🏫 高校: {{ post.school }}{% endif %}
+                        </p>
+                        <p class="post-caption">{{ post.caption }}</p>
+                        <p>❤️ いいね数: {{ post.like_count }}</p>
+                        <small>📅 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') if post.created_at else 'N/A' }}</small>
+                        <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="margin-top: 10px;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" onclick="return confirm('本当にこの投稿を削除しますか？');" class="delete-button">🗑️ 削除</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>まだ投稿がありません。初めてのおすすめグルメを投稿してみましょう！ ✨</p>
+        {% endif %}
+    </div>
+{% endblock %}

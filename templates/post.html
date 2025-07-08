@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}レビューを投稿{% endblock %}
+{% block content %}
+    <h1>推しメシを投稿 🍴</h1>
+    <p>ようこそ、{{ username }} さん！あなたのおすすめのお店を教えてください ✨</p>
+    <form method="post" enctype="multipart/form-data">
+        <div>
+            <label for="image">📸 写真 (JPEG/PNG):</label>
+            <input type="file" id="image" name="image" accept="image/jpeg, image/png" required>
+        </div>
+        <div>
+            <label for="store_name">🏪 店名:</label>
+            <input type="text" id="store_name" name="store_name" value="{{ store_name }}" required maxlength="50">
+        </div>
+        <div>
+            <label for="area">📍 地域 (例: 山梨県◯◯市):</label>
+            <input type="text" id="area" name="area" value="{{ area }}" required>
+        </div>
+        <div>
+            <label for="price_range">💰 価格帯:</label>
+            <select id="price_range" name="price_range" required>
+                {% for option in price_options %}
+                <option value="{{ option }}" {% if option == price_range_selected %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="school">🏫 高校 (任意):</label>
+            <select id="school" name="school">
+                <option value="">選択なし</option>
+                {% for school in school_options %}
+                    <option value="{{ school }}" {% if school == school_selected %}selected{% endif %}>{{ school }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="caption">📝 紹介文・コメント:</label>
+            <textarea id="caption" name="caption" rows="5" required maxlength="500">{{ caption }}</textarea>
+        </div>
+        <button type="submit">投稿する 🚀</button>
+    </form>
+{% endblock %}

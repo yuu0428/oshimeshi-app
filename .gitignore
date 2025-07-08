@@ -1,0 +1,13 @@
+# .gitignore
+
+__pycache__/
+*.pyc
+.env
+.env.backup
+venv/
+database.db
+*.log*
+.DS_Store
+node_modules/
+.pytest_cache/
+.git/

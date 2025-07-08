@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block title %}検索 - 推しメシ{% endblock %}
+{% block content %}
+    <h1>みんなの推しメシを検索 🔍</h1>
+    
+    <form method="POST" class="search-form">
+        <div>
+            <label for="area">📍 地域:</label>
+            <input type="text" id="area" name="area" value="{{ search_criteria.area or '' }}" placeholder="例: 甲府">
+        </div>
+        <div>
+            <label for="store_name">🏪 店名:</label>
+            <input type="text" id="store_name" name="store_name" value="{{ search_criteria.store_name or '' }}" placeholder="例: カフェ">
+        </div>
+        <div>
+            <label for="price_range">💰 価格帯:</label>
+            <select id="price_range" name="price_range">
+                {% for option in price_options %}
+                    <option value="{{ option }}" {% if option == search_criteria.price_range %}selected{% endif %}>
+                        {% if option %}{{ option }}{% else %}指定なし{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="school">🏫 高校:</label>
+            <select id="school" name="school">
+                {% for option in school_options %}
+                    <option value="{{ option }}" {% if option == search_criteria.school %}selected{% endif %}>
+                        {% if option %}{{ option }}{% else %}指定なし{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit">検索する 🔍</button>
+        </div>
+    </form>
+
+    {% if results %}
+        <h2>検索結果 ({{ results|length }}件) 📋</h2>
+        <div class="posts-container">
+            {% for post in results %}
+                <div class="post-card">
+                    {% if post.image_path %}
+                        <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
+                    {% endif %}
+                    <div class="post-content">
+                        <h3>{{ post.store_name }}</h3>
+                        <div class="post-meta">
+                            <strong>📍 地域:</strong> {{ post.area }} | 
+                            <strong>💰 価格帯:</strong> {{ post.price_range }} | 
+                            <strong>👤 投稿者:</strong> {{ post.username }}
+                            {% if post.school %} | <strong>🏫 高校:</strong> {{ post.school }}{% endif %}
+                        </div>
+                        <div class="post-caption">{{ post.caption }}</div>
+                        <div class="post-actions">
+                            <button type="button" class="like-button{% if post.id in liked_posts %} liked{% endif %}" data-post-id="{{ post.id }}">
+                                <span class="heart-icon">{% if post.id in liked_posts %}❤️{% else %}🤍{% endif %}</span>
+                                <span class="like-count">{{ post.like_count }}</span>
+                            </button>
+                            
+                            {% if session.is_admin %}
+                                <form method="POST" action="{{ url_for('admin_delete_post', post_id=post.id) }}" 
+                                      style="display: inline-block; margin-left: 10px;"
+                                      onsubmit="return confirm('この投稿を削除してもよろしいですか？');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="delete-button">🗑️ 削除</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if request.method == 'POST' %}
+            <p>検索条件に一致するグルメが見つかりませんでした。😔<br>
+            別の条件で検索してみてください！</p>
+        {% else %}
+            <p>検索条件を入力して、お気に入りのグルメを探してみてください ✨</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
