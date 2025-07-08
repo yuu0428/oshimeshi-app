@@ -8,6 +8,6 @@ Pillow==10.4.0
 Flask-Limiter==3.8.0
 Flask-Talisman==1.1.0
 Werkzeug==3.0.0
-SQLAlchemy==1.4.53
+SQLAlchemy==2.0.23
 WTForms==3.1.2
 gunicorn==21.2.0
