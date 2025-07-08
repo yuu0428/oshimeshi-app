@@ -1003,7 +1003,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3650)  # セッショ�
 def make_session_permanent():
     session.permanent = True
 
-
+@app.route('/robots.txt')
+def robots():
+    return app.send_static_file('robots.txt')
 
 if __name__ == '__main__':
     app.run(debug=True)

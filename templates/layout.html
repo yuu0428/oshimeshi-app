@@ -10,6 +10,10 @@
         // CSRF トークンをグローバルに利用可能にする
         window.csrf_token = "{{ csrf_token() }}";
     </script>
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow">
+    
+    <title>{% block title %}🍜 推しメシ{% endblock %}</title>
 </head>
 <body>
     <nav>

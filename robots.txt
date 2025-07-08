@@ -1,0 +1,5 @@
+# robots.txt 作成（検索エンジンを完全ブロック）
+@"
+User-agent: *
+Disallow: /
+"@ | Out-File -FilePath static/robots.txt -Encoding utf8
