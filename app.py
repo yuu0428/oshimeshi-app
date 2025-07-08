@@ -980,7 +980,14 @@ def backup_database():
     shutil.copy2(DATABASE, f"backups/{backup_name}")
 
 if not app.debug and os.environ.get('FLASK_ENV') == 'production':
-    Talisman(app, force_https=True)
+    csp = {
+        'default-src': "'self'",
+        'script-src': "'self' 'unsafe-inline'",
+        'style-src': "'self' 'unsafe-inline' fonts.googleapis.com",
+        'font-src': "'self' fonts.gstatic.com",
+        'img-src': "'self' data:",
+    }
+    Talisman(app, force_https=True, content_security_policy=csp)
 
 
 # 環境に応じたセッション設定
