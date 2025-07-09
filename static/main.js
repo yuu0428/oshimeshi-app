@@ -305,18 +305,32 @@ function showPostDetail(cardElement) {
 
 // 🆕 公式情報モーダル初期化
 function initializeOfficialInfoModal() {
+    // デスクトップ版
     const officialBtn = document.getElementById('officialInfoBtn');
+    // モバイル版
+    const officialBtnMobile = document.getElementById('officialInfoBtnMobile');
     const officialModal = document.getElementById('officialInfoModal');
     const closeBtn = document.getElementById('closeOfficialModal');
     
-    if (!officialBtn || !officialModal) return;
+    if (!officialModal) return;
 
-    // 公式情報ボタンクリック
-    officialBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        openOfficialModal(officialModal);
-    });
+    // デスクトップ版ボタン
+    if (officialBtn) {
+        officialBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openOfficialModal(officialModal);
+        });
+    }
+
+    // モバイル版ボタン
+    if (officialBtnMobile) {
+        officialBtnMobile.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openOfficialModal(officialModal);
+        });
+    }
 
     // 閉じるボタンクリック
     if (closeBtn) {
@@ -338,10 +352,8 @@ function initializeOfficialInfoModal() {
     if (instagramBtn) {
         instagramBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            // デプロイ後にInstagramアカウント作成時にリンクを設定
             const instagramURL = 'https://instagram.com/oshimeshi_yamanashi';
             
-            // 実際のリンクが設定されるまでは案内メッセージ
             if (this.getAttribute('href') === '#' || !this.getAttribute('href')) {
                 alert('Instagramアカウントは近日公開予定です！\nしばらくお待ちください。');
                 return;
@@ -545,77 +557,91 @@ function clearFieldError(field) {
 
 // モバイルメニュー
 function initializeMobileMenu() {
-    const nav = document.querySelector('nav');
-    if (!nav) return;
-
-    // モバイルメニューボタンを作成
-    const mobileMenuBtn = document.createElement('button');
-    mobileMenuBtn.className = 'mobile-menu-btn';
-    mobileMenuBtn.innerHTML = '☰';
-    mobileMenuBtn.style.cssText = `
-        display: none;
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: #4A4A4A;
-        cursor: pointer;
-        padding: 0.5rem;
-    `;
-
-    // ナビゲーションリンクを取得
-    const navLinks = nav.querySelectorAll('a:not(.mobile-menu-btn)');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const hamburgerIcon = mobileMenuBtn?.querySelector('.hamburger-icon');
     
-    // モバイルメニューコンテナを作成
-    const mobileMenu = document.createElement('div');
-    mobileMenu.className = 'mobile-menu';
-    mobileMenu.style.cssText = `
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(253, 252, 248, 0.95);
-        backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(164, 165, 132, 0.1);
-        padding: 1rem;
-        flex-direction: column;
-        gap: 1rem;
-    `;
+    if (!mobileMenuBtn || !mobileMenu) {
+        console.warn('モバイルメニューの要素が見つかりません');
+        return;
+    }
 
     // メニューボタンクリックイベント
-    mobileMenuBtn.addEventListener('click', function() {
-        const isOpen = mobileMenu.style.display === 'flex';
-        mobileMenu.style.display = isOpen ? 'none' : 'flex';
-        this.innerHTML = isOpen ? '☰' : '✕';
+    mobileMenuBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMobileMenu();
     });
 
-    // ナビゲーションに追加
-    if (nav.firstChild) {
-        nav.insertBefore(mobileMenuBtn, nav.firstChild);
-    }
-    nav.appendChild(mobileMenu);
+    // メニュー項目クリック時にメニューを閉じる
+    const menuItems = mobileMenu.querySelectorAll('a, button');
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            closeMobileMenu();
+        });
+    });
 
-    // レスポンシブ表示制御
-    function updateMobileMenu() {
-        if (window.innerWidth <= 768) {
-            mobileMenuBtn.style.display = 'block';
-            navLinks.forEach(link => {
-                if (!mobileMenu.contains(link)) {
-                    mobileMenu.appendChild(link.cloneNode(true));
-                    link.style.display = 'none';
-                }
-            });
+    // 画面外クリックでメニューを閉じる
+    document.addEventListener('click', function(e) {
+        if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            closeMobileMenu();
+        }
+    });
+
+    // ESCキーでメニューを閉じる
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('show')) {
+            closeMobileMenu();
+        }
+    });
+
+    // 画面サイズ変更時の処理
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && mobileMenu.classList.contains('show')) {
+            closeMobileMenu();
+        }
+    });
+
+    // メニュー開閉関数
+    function toggleMobileMenu() {
+        const isOpen = mobileMenu.classList.contains('show');
+        
+        if (isOpen) {
+            closeMobileMenu();
         } else {
-            mobileMenuBtn.style.display = 'none';
-            mobileMenu.style.display = 'none';
-            navLinks.forEach(link => {
-                link.style.display = '';
-            });
+            openMobileMenu();
         }
     }
 
-    window.addEventListener('resize', updateMobileMenu);
-    updateMobileMenu();
+    function openMobileMenu() {
+        mobileMenu.classList.add('show');
+        if (hamburgerIcon) {
+            hamburgerIcon.textContent = '✕';
+        }
+        mobileMenuBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden'; // スクロール防止
+        
+        // フォーカス管理
+        const firstMenuItem = mobileMenu.querySelector('a, button');
+        if (firstMenuItem) {
+            setTimeout(() => firstMenuItem.focus(), 100);
+        }
+    }
+
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('show');
+        if (hamburgerIcon) {
+            hamburgerIcon.textContent = '☰';
+        }
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = 'auto'; // スクロール復元
+        mobileMenuBtn.focus(); // フォーカスをボタンに戻す
+    }
+
+    // 初期設定
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    mobileMenuBtn.setAttribute('aria-controls', 'mobileMenu');
+    mobileMenu.setAttribute('aria-hidden', 'true');
 }
 
 // 検索・フィルタ機能
