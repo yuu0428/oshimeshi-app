@@ -2159,83 +2159,92 @@ a:focus {
 }
 
 /* =================================
-   select要素 緊急修正（最優先）
+   select要素 サイズ修正（最優先）
 ================================= */
 
-/* 全てのCSS干渉を無効化 */
+/* 過大なサイズ設定をリセット */
 @media (max-width: 768px) {
     select {
-        /* 最優先でネイティブスタイル強制 */
+        /* 基本サイズ設定 */
+        font-size: 14px !important;  /* 16px→14pxに縮小 */
+        min-height: 40px !important; /* 48px→40pxに縮小 */
+        height: 40px !important;     /* 高さ固定 */
+        padding: 8px 12px !important; /* パディング縮小 */
+        margin: 2px 0 !important;    /* マージン縮小 */
+        
+        /* 幅設定 */
+        width: 100% !important;
+        max-width: 300px !important; /* 最大幅制限 */
+        box-sizing: border-box !important;
+        
+        /* ネイティブスタイル */
         -webkit-appearance: menulist !important;
         -moz-appearance: menulist !important;
         appearance: menulist !important;
         
-        /* 背景・ボーダー・レイアウト */
+        /* 背景とボーダー */
         background: white !important;
         background-image: none !important;
-        background-color: white !important;
-        border: 1px solid #999 !important;
+        border: 1px solid #ccc !important;
         border-radius: 4px !important;
         
-        /* サイズとフォント */
-        font-size: 16px !important;
-        min-height: 48px !important;
-        padding: 8px !important;
-        margin: 4px 0 !important;
-        
-        /* 位置とz-index */
+        /* 位置設定 */
         position: relative !important;
-        z-index: 999999 !important;
+        z-index: 1000 !important;
         
-        /* 変形・フィルター無効化 */
+        /* 変形無効化 */
         transform: none !important;
         filter: none !important;
         backdrop-filter: none !important;
+        zoom: 1 !important;
         
         /* イベント処理 */
         pointer-events: auto !important;
         touch-action: manipulation !important;
         
-        /* 幅設定 */
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        
         /* 描画最適化 */
         will-change: auto !important;
-        -webkit-transform: translateZ(0) !important;
-        
-        /* その他のリセット */
-        box-shadow: none !important;
+        overflow: visible !important;
+    }
+    
+    /* さらに小さな画面 */
+    @media (max-width: 480px) {
+        select {
+            font-size: 13px !important;
+            min-height: 36px !important;
+            height: 36px !important;
+            padding: 6px 10px !important;
+            max-width: 250px !important;
+        }
+    }
+    
+    /* フォーカス時のサイズ維持 */
+    select:focus {
+        font-size: 14px !important;
+        height: 40px !important;
+        border-color: #007bff !important;
         outline: none !important;
     }
     
-    /* フォーカス時 */
-    select:focus {
-        border-color: #007bff !important;
-        z-index: 9999999 !important;
-    }
-    
-    /* 親要素の干渉も無効化 */
-    .search-form,
-    form,
-    .school-selector {
-        backdrop-filter: none !important;
-        filter: none !important;
-        transform: none !important;
+    /* 親要素のサイズ制限 */
+    .search-form > div,
+    form > div {
+        max-width: 100% !important;
         overflow: visible !important;
-        position: relative !important;
-        z-index: 1 !important;
     }
     
-    /* ナビゲーションのz-indexを下げる */
-    nav {
-        z-index: 100 !important;
+    /* label要素のサイズ調整 */
+    label {
+        font-size: 14px !important;
+        margin-bottom: 4px !important;
     }
-    
-    /* モーダルのz-indexを下げる */
-    .modal,
-    .official-info-modal {
-        z-index: 500 !important;
+}
+
+/* デスクトップでは通常サイズ */
+@media (min-width: 769px) {
+    select {
+        font-size: 16px !important;
+        min-height: 44px !important;
+        padding: 10px 15px !important;
     }
 }
