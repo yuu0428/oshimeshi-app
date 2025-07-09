@@ -2157,3 +2157,80 @@ a:focus {
         color: white;
     }
 }
+
+/* =================================
+   緊急モバイルselect修正
+================================= */
+
+/* 全てのselect要素のモバイル対応（最優先） */
+@media screen and (max-width: 768px) {
+    select,
+    .search-form select,
+    .school-select,
+    form select {
+        /* 強制的にネイティブUIを使用 */
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        
+        /* カスタム背景を無効化 */
+        background-image: none !important;
+        background: white !important;
+        
+        /* タッチ操作最適化 */
+        min-height: 48px !important;
+        font-size: 16px !important;
+        padding: 12px !important;
+        padding-right: 12px !important;
+        
+        /* ボーダーとレイアウト */
+        border: 2px solid #ccc !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        
+        /* イベント処理 */
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        
+        /* z-indexを最前面に */
+        position: relative !important;
+        z-index: 999 !important;
+    }
+    
+    /* フォーカス時の見た目 */
+    select:focus,
+    .search-form select:focus,
+    .school-select:focus,
+    form select:focus {
+        outline: 2px solid #007bff !important;
+        outline-offset: 2px !important;
+        border-color: #007bff !important;
+    }
+    
+    /* option要素 */
+    select option {
+        background: white !important;
+        color: black !important;
+        padding: 10px !important;
+    }
+}
+
+/* iPhone専用の追加修正 */
+@media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+    select {
+        /* iOSでのタッチ問題解決 */
+        -webkit-touch-callout: default !important;
+        -webkit-user-select: auto !important;
+        user-select: auto !important;
+    }
+}
+
+/* 非常に小さな画面（iPhone SE等） */
+@media screen and (max-width: 375px) {
+    select {
+        font-size: 17px !important; /* iOSズーム防止 */
+        min-height: 52px !important;
+        padding: 14px !important;
+    }
+}
