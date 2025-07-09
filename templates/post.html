@@ -4,6 +4,7 @@
     <h1>推しメシを投稿 🍴</h1>
     <p>ようこそ、{{ username }} さん！あなたのおすすめのお店を教えてください ✨</p>
     <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div>
             <label for="image">📸 写真 (JPEG/PNG):</label>
             <input type="file" id="image" name="image" accept="image/jpeg, image/png" required>
