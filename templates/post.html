@@ -19,7 +19,7 @@
         </div>
         <div>
             <label for="price_range">💰 価格帯:</label>
-            <select id="price_range" name="price_range" required>
+            <select id="price_range" name="price_range">
                 {% for option in price_options %}
                 <option value="{{ option }}" {% if option == price_range_selected %}selected{% endif %}>{{ option }}</option>
                 {% endfor %}
