@@ -664,23 +664,19 @@ function initializeSearchFilters() {
         }
     }
 
-    // フィルタ選択の拡張
-    filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            // アニメーション付きでフィルタを適用
-            const container = document.querySelector('.posts-container, .ranking-container');
-            if (container) {
-                container.style.opacity = '0.5';
-                container.style.transform = 'scale(0.98)';
-                
-                setTimeout(() => {
-                    this.form.submit();
-                }, 150);
-            } else {
-                this.form.submit();
-            }
+    // モバイル対応: select要素の自動送信を無効化
+    if (window.innerWidth <= 768) {
+        const allSelects = document.querySelectorAll('select');
+        allSelects.forEach(select => {
+            // 既存のchange イベントリスナーを削除
+            select.removeAttribute('onchange');
+            
+            // changeイベントを一時的に無効化
+            select.addEventListener('change', function(e) {
+                e.stopImmediatePropagation();
+            });
         });
-    });
+    }
 }
 
 function performSearch(query) {
