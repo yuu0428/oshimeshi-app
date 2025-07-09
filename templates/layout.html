@@ -15,16 +15,40 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('index') }}">🏠 ホーム</a>
-        <a href="{{ url_for('post') }}">📝 投稿</a>
-        <a href="{{ url_for('search') }}">🔍 検索</a>
-        <a href="{{ url_for('ranking') }}"><span>🏆</span> ランキング</a>
-        <a href="{{ url_for('advertisements') }}">📢 広告</a>
-        <a href="{{ url_for('account') }}">👤 アカウント ({{ session.username if session.username else 'ゲスト' }})</a>
-        {% if session.is_admin %}
-            <span style="color: #ffc107; font-weight: bold;">【🔧 管理者】</span>
-        {% endif %}
-        <button type="button" id="officialInfoBtn" class="official-info-btn">📱 公式情報</button>
+        <div class="nav-container">
+            <!-- ハンバーガーメニューボタン -->
+            <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
+                <span class="hamburger-icon">☰</span>
+            </button>
+        
+            <!-- デスクトップナビゲーション -->
+            <div class="desktop-nav">
+                <a href="{{ url_for('index') }}">🏠 ホーム</a>
+                <a href="{{ url_for('post') }}">📝 投稿</a>
+                <a href="{{ url_for('search') }}">🔍 検索</a>
+                <a href="{{ url_for('ranking') }}"><span>🏆</span> ランキング</a>
+                <a href="{{ url_for('advertisements') }}">📢 広告</a>
+                <a href="{{ url_for('account') }}">👤 アカウント ({{ session.username if session.username else 'ゲスト' }})</a>
+                {% if session.is_admin %}
+                    <span style="color: #ffc107; font-weight: bold;">【🔧 管理者】</span>
+                {% endif %}
+                <button type="button" id="officialInfoBtn" class="official-info-btn">📱 公式情報</button>
+            </div>
+        
+            <!-- モバイルメニュー -->
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="{{ url_for('index') }}">🏠 ホーム</a>
+                <a href="{{ url_for('post') }}">📝 投稿</a>
+                <a href="{{ url_for('search') }}">🔍 検索</a>
+                <a href="{{ url_for('ranking') }}">🏆 ランキング</a>
+                <a href="{{ url_for('advertisements') }}">📢 広告</a>
+                <a href="{{ url_for('account') }}">👤 アカウント</a>
+                {% if session.is_admin %}
+                    <span class="admin-badge">🔧 管理者</span>
+                {% endif %}
+                <button type="button" id="officialInfoBtnMobile" class="official-info-btn mobile">📱 公式情報</button>
+            </div>
+        </div>
     </nav>
 
     <div class="content">
