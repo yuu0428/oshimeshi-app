@@ -2159,78 +2159,83 @@ a:focus {
 }
 
 /* =================================
-   緊急モバイルselect修正
+   select要素 緊急修正（最優先）
 ================================= */
 
-/* 全てのselect要素のモバイル対応（最優先） */
-@media screen and (max-width: 768px) {
-    select,
-    .search-form select,
-    .school-select,
-    form select {
-        /* 強制的にネイティブUIを使用 */
+/* 全てのCSS干渉を無効化 */
+@media (max-width: 768px) {
+    select {
+        /* 最優先でネイティブスタイル強制 */
         -webkit-appearance: menulist !important;
         -moz-appearance: menulist !important;
         appearance: menulist !important;
         
-        /* カスタム背景を無効化 */
-        background-image: none !important;
+        /* 背景・ボーダー・レイアウト */
         background: white !important;
+        background-image: none !important;
+        background-color: white !important;
+        border: 1px solid #999 !important;
+        border-radius: 4px !important;
         
-        /* タッチ操作最適化 */
-        min-height: 48px !important;
+        /* サイズとフォント */
         font-size: 16px !important;
-        padding: 12px !important;
-        padding-right: 12px !important;
+        min-height: 48px !important;
+        padding: 8px !important;
+        margin: 4px 0 !important;
         
-        /* ボーダーとレイアウト */
-        border: 2px solid #ccc !important;
-        border-radius: 8px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        /* 位置とz-index */
+        position: relative !important;
+        z-index: 999999 !important;
+        
+        /* 変形・フィルター無効化 */
+        transform: none !important;
+        filter: none !important;
+        backdrop-filter: none !important;
         
         /* イベント処理 */
         pointer-events: auto !important;
         touch-action: manipulation !important;
         
-        /* z-indexを最前面に */
-        position: relative !important;
-        z-index: 999 !important;
+        /* 幅設定 */
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        
+        /* 描画最適化 */
+        will-change: auto !important;
+        -webkit-transform: translateZ(0) !important;
+        
+        /* その他のリセット */
+        box-shadow: none !important;
+        outline: none !important;
     }
     
-    /* フォーカス時の見た目 */
-    select:focus,
-    .search-form select:focus,
-    .school-select:focus,
-    form select:focus {
-        outline: 2px solid #007bff !important;
-        outline-offset: 2px !important;
+    /* フォーカス時 */
+    select:focus {
         border-color: #007bff !important;
+        z-index: 9999999 !important;
     }
     
-    /* option要素 */
-    select option {
-        background: white !important;
-        color: black !important;
-        padding: 10px !important;
+    /* 親要素の干渉も無効化 */
+    .search-form,
+    form,
+    .school-selector {
+        backdrop-filter: none !important;
+        filter: none !important;
+        transform: none !important;
+        overflow: visible !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
-}
-
-/* iPhone専用の追加修正 */
-@media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
-    select {
-        /* iOSでのタッチ問題解決 */
-        -webkit-touch-callout: default !important;
-        -webkit-user-select: auto !important;
-        user-select: auto !important;
+    
+    /* ナビゲーションのz-indexを下げる */
+    nav {
+        z-index: 100 !important;
     }
-}
-
-/* 非常に小さな画面（iPhone SE等） */
-@media screen and (max-width: 375px) {
-    select {
-        font-size: 17px !important; /* iOSズーム防止 */
-        min-height: 52px !important;
-        padding: 14px !important;
+    
+    /* モーダルのz-indexを下げる */
+    .modal,
+    .official-info-modal {
+        z-index: 500 !important;
     }
 }
