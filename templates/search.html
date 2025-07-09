@@ -3,7 +3,8 @@
 {% block content %}
     <h1>みんなの推しメシを検索 🔍</h1>
     
-    <form method="POST" class="search-form">
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div>
             <label for="area">📍 地域:</label>
             <input type="text" id="area" name="area" value="{{ search_criteria.area or '' }}" placeholder="例: 甲府">
