@@ -709,7 +709,54 @@ textarea {
     font-family: inherit;
     margin-bottom: 1rem;
     background: rgba(255, 255, 255, 0.9);
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* select要素の特別対応 */
+select {
+    /* デスクトップでのカスタムデザイン */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* カスタム矢印アイコン */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    
+    /* タッチ対応 */
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* モバイル専用対応 */
+@media (max-width: 768px) {
+    select {
+        /* モバイルではネイティブスタイルを使用 */
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        
+        /* ネイティブ矢印を使用 */
+        background-image: none !important;
+        padding-right: 1rem;
+        
+        /* タッチ操作の最適化 */
+        min-height: 48px; /* Appleのガイドライン準拠 */
+        font-size: 16px; /* iOSでズームを防ぐ */
+    }
+}
+
+/* さらに小さな画面での対応 */
+@media (max-width: 480px) {
+    select {
+        min-height: 52px;
+        padding: 1rem;
+        font-size: 16px; /* 重要：16px未満だとiOSでズームされる */
+    }
 }
 
 input:focus,
@@ -718,6 +765,14 @@ textarea:focus {
     outline: none;
     border-color: #A4A584;
     box-shadow: 0 0 0 3px rgba(164, 165, 132, 0.1);
+}
+
+/* select要素のホバー状態（デスクトップのみ） */
+@media (hover: hover) {
+    select:hover {
+        border-color: #A4A584;
+        background-color: rgba(164, 165, 132, 0.05);
+    }
 }
 
 button[type="submit"],
@@ -738,6 +793,26 @@ button[type="submit"]:hover,
 input[type="submit"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(164, 165, 132, 0.4);
+}
+
+/* option要素のスタイリング */
+select option {
+    background: white;
+    color: #4A4A4A;
+    padding: 0.5rem;
+}
+
+/* Internet Explorer対応 */
+select::-ms-expand {
+    display: none;
+}
+
+/* 無効状態 */
+select:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* =================================
@@ -935,12 +1010,41 @@ input[type="submit"]:hover {
 }
 
 /* 高校選択セクション */
-.school-selector {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(248, 249, 250, 0.9), rgba(240, 242, 247, 0.9));
-    border-radius: 12px;
-    border: 1px solid rgba(164, 165, 132, 0.2);
+.school-select {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid rgba(164, 165, 132, 0.3);
+    border-radius: 8px;
+    background: white;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4A4A4A;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+    
+    /* モバイル対応追加 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A4A4A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+}
+
+/* モバイルでの学校選択 */
+@media (max-width: 768px) {
+    .school-select {
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        background-image: none !important;
+        padding-right: 16px;
+        min-height: 48px;
+        font-size: 16px;
+    }
 }
 
 .school-form {
