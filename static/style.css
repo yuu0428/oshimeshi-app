@@ -31,23 +31,62 @@ nav {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 0 1rem;
     height: 70px;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* ハンバーガーメニューボタン */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #4A4A4A;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    z-index: 1001;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(164, 165, 132, 0.1);
+}
+
+.mobile-menu-btn:focus {
+    outline: 2px solid #A4A584;
+    outline-offset: 2px;
+}
+
+/* デスクトップナビゲーション */
+.desktop-nav {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
     gap: 0.5rem;
+    flex: 1;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
-nav::-webkit-scrollbar {
+.desktop-nav::-webkit-scrollbar {
     display: none;
 }
 
-nav a {
+.desktop-nav a,
+.desktop-nav .official-info-btn {
     text-decoration: none;
     color: #4A4A4A;
     font-weight: 400;
@@ -62,206 +101,184 @@ nav a {
     white-space: nowrap;
     font-size: 0.9rem;
     flex-shrink: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-nav a:hover {
+.desktop-nav a:hover,
+.desktop-nav .official-info-btn:hover {
     color: #A4A584;
     background: rgba(164, 165, 132, 0.1);
 }
 
-nav a:first-child {
+.desktop-nav a:first-child {
     font-size: 1.2rem;
     font-weight: 700;
     color: #A4A584;
     margin-right: 1rem;
 }
 
-nav a:first-child::before {
+.desktop-nav a:first-child::before {
     content: '🍴';
     margin-right: 0.3rem;
 }
 
-nav span {
-    background: rgba(164, 165, 132, 0.1);
-    padding: 0.3rem 0.6rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    margin-left: 0.5rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-/* 公式情報ボタン（コンパクト版） */
-.official-info-btn {
+/* 公式情報ボタン（デスクトップ） */
+.desktop-nav .official-info-btn {
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
     margin-left: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
-    white-space: nowrap;
-    flex-shrink: 0;
 }
 
-.official-info-btn:hover {
+.desktop-nav .official-info-btn:hover {
     background: linear-gradient(135deg, #0056b3, #004085);
+    color: white;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
 }
 
-/* 特定の幅での調整 */
-@media (max-width: 1400px) {
-    nav {
-        padding: 0 0.5rem;
-    }
-    
-    nav a {
+/* モバイルメニュー */
+.mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(253, 252, 248, 0.98);
+    backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(164, 165, 132, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1000;
+    border-radius: 0 0 12px 12px;
+}
+
+.mobile-menu.show {
+    display: flex;
+}
+
+.mobile-menu a,
+.mobile-menu .official-info-btn {
+    text-decoration: none;
+    color: #4A4A4A;
+    font-weight: 500;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.mobile-menu a:hover,
+.mobile-menu .official-info-btn:hover {
+    background: rgba(164, 165, 132, 0.1);
+    color: #A4A584;
+    transform: translateX(5px);
+}
+
+/* モバイル版公式情報ボタン */
+.mobile-menu .official-info-btn.mobile {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    margin-top: 0.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    justify-content: center;
+}
+
+.mobile-menu .official-info-btn.mobile:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    color: white;
+    transform: translateX(0) translateY(-1px);
+}
+
+/* 管理者バッジ（モバイル） */
+.mobile-menu .admin-badge {
+    color: #ffc107;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+
+/* レスポンシブ制御 */
+@media (max-width: 1200px) {
+    .desktop-nav a,
+    .desktop-nav .official-info-btn {
         margin: 0 0.3rem;
         padding: 0.3rem 0.6rem;
         font-size: 0.85rem;
     }
     
-    nav a:first-child {
+    .desktop-nav a:first-child {
         font-size: 1.1rem;
         margin-right: 0.8rem;
     }
-    
-    .official-info-btn {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.8rem;
-        margin-left: 0.3rem;
-    }
-    
-    nav span {
-        padding: 0.2rem 0.5rem;
-        font-size: 0.75rem;
-        margin-left: 0.3rem;
-    }
 }
 
-@media (max-width: 1200px) {
-    nav {
-        padding: 0 0.3rem;
-    }
-    
-    nav a {
-        margin: 0 0.2rem;
-        padding: 0.3rem 0.5rem;
-        font-size: 0.8rem;
-    }
-    
-    nav a:first-child {
-        font-size: 1rem;
-        margin-right: 0.5rem;
-    }
-    
-    nav a:first-child::before {
-        margin-right: 0.2rem;
-    }
-    
-    .official-info-btn {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.75rem;
-        margin-left: 0.2rem;
-    }
-    
-    nav span {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.7rem;
-        margin-left: 0.2rem;
-    }
-}
-
-/* 非常に狭い画面での縦配置対応 */
 @media (max-width: 768px) {
-    nav {
-        height: auto;
-        min-height: 70px;
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 0.5rem;
+    .mobile-menu-btn {
+        display: block;
     }
     
-    nav a:first-child {
-        width: 100%;
-        justify-content: center;
-        margin-bottom: 0.5rem;
-        margin-right: 0;
-        order: -1;
+    .desktop-nav {
+        display: none;
     }
     
-    nav a {
-        margin: 0.1rem 0.2rem;
-        font-size: 0.8rem;
+    .nav-container {
+        justify-content: flex-start;
     }
     
-    .official-info-btn {
-        margin: 0.1rem 0.2rem;
-        font-size: 0.8rem;
-    }
-    
-    nav span {
-        margin: 0.1rem 0.2rem;
-        font-size: 0.8rem;
+    body {
+        padding-top: 70px;
     }
 }
 
 @media (max-width: 480px) {
-    body {
-        padding-top: 100px;
+    .nav-container {
+        padding: 0 0.5rem;
     }
     
-    nav {
-        padding: 0.5rem 0.2rem;
+    .mobile-menu {
+        padding: 0.8rem;
     }
     
-    nav a {
-        margin: 0.1rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.75rem;
-    }
-    
-    nav a:first-child {
-        font-size: 1rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    .official-info-btn {
-        margin: 0.1rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.75rem;
-    }
-    
-    nav span {
-        margin: 0.1rem;
-        font-size: 0.75rem;
+    .mobile-menu a,
+    .mobile-menu .official-info-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
     }
 }
 
-/* 公式情報ボタン（ナビゲーション内） */
-.official-info-btn {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
+/* アニメーション */
+.mobile-menu {
+    opacity: 0;
+    transform: translateY(-10px);
     transition: all 0.3s ease;
-    margin-left: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
-.official-info-btn:hover {
-    background: linear-gradient(135deg, #0056b3, #004085);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+.mobile-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* フォーカス管理 */
+.mobile-menu a:focus,
+.mobile-menu .official-info-btn:focus {
+    outline: 2px solid #A4A584;
+    outline-offset: 2px;
 }
 
 /* =================================
