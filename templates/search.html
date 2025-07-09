@@ -82,4 +82,36 @@
             <p>検索条件を入力して、お気に入りのグルメを探してみてください ✨</p>
         {% endif %}
     {% endif %}
+<!-- 検索画面の最下部に追加 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 768) {
+        console.log('Mobile device detected');
+        
+        // すべてのselect要素をログ出力
+        const selects = document.querySelectorAll('select');
+        selects.forEach((select, index) => {
+            console.log(`Select ${index}:`, select);
+            
+            // click/touchイベントをログ
+            select.addEventListener('touchstart', function(e) {
+                console.log('Touch start on select:', e.target);
+            });
+            
+            select.addEventListener('focus', function(e) {
+                console.log('Focus on select:', e.target);
+            });
+            
+            select.addEventListener('blur', function(e) {
+                console.log('Blur on select:', e.target);
+            });
+        });
+        
+        // 他の要素からのイベント干渉をチェック
+        document.addEventListener('click', function(e) {
+            console.log('Click event:', e.target);
+        });
+    }
+});
+</script>
 {% endblock %}
