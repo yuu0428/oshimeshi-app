@@ -126,5 +126,20 @@ document.querySelectorAll('label').forEach((label, index) => {
 });
 
 debugLog('Debug system initialized');
+// JavaScriptイベントの干渉をチェック
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'SELECT') {
+        debugLog('Document click on select detected - this might be interfering!');
+    }
+});
+
+document.addEventListener('touchstart', function(e) {
+    if (e.target.tagName === 'SELECT') {
+        debugLog('Document touchstart on select detected');
+    }
+});
+
+// main.jsからのイベントリスナーを一時的に無効化
+debugLog('Checking for interfering event listeners...');
 </script>
 {% endblock %}

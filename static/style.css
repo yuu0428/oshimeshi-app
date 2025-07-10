@@ -51,7 +51,7 @@ nav {
 @media (max-width: 768px) {
     nav {
         height: 80px; /* モバイルでは少し高く */
-        z-index: 10; /* さらにz-indexを下げる */
+        z-index: 1; /* さらにz-indexを下げる */
     }
 }
 
@@ -2162,41 +2162,36 @@ a:focus {
 
 
 /* =================================
-   モバイル select要素 シンプル版
+   モバイル select要素 最小限版
 ================================= */
 
 @media (max-width: 768px) {
+    /* 重要：すべての装飾を削除して基本設定のみ */
     select {
-        /* 基本設定のみ */
         font-size: 16px !important;
         min-height: 50px !important;
         padding: 15px !important;
-        margin: 10px 0 !important;
         width: 100% !important;
         
-        /* iOS必須設定 */
+        /* iOS基本設定のみ */
         -webkit-appearance: menulist !important;
         -moz-appearance: menulist !important;
         appearance: menulist !important;
         
-        /* 基本スタイル */
+        /* 最小限のスタイル */
         background: white !important;
-        border: 2px solid #007bff !important;
-        border-radius: 8px !important;
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
         
-        /* クリック設定 */
+        /* 重要：すべての位置・変形設定を削除 */
+        position: static !important;
+        z-index: auto !important;
+        transform: none !important;
+        filter: none !important;
+        backdrop-filter: none !important;
+        
+        /* 基本のイベント設定のみ */
         pointer-events: auto !important;
-        touch-action: manipulation !important;
-        
-        /* デバッグ用 */
-        background: rgba(255, 255, 0, 0.3) !important; /* 黄色で確認 */
-    }
-    
-    /* label設定 */
-    label {
-        font-size: 16px !important;
-        margin-bottom: 5px !important;
-        display: block !important;
-        /* pointer-eventsは設定しない（デフォルトのまま） */
+        touch-action: auto !important;
     }
 }
