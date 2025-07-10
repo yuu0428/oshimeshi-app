@@ -51,7 +51,7 @@ nav {
 @media (max-width: 768px) {
     nav {
         height: 80px; /* モバイルでは少し高く */
-        z-index: 50; /* さらにz-indexを下げる */
+        z-index: 10; /* さらにz-indexを下げる */
     }
 }
 
@@ -2318,7 +2318,7 @@ a:focus {
     /* フォーム要素を確実に最前面に */
     form {
         position: relative !important;
-        z-index: 200 !important; /* ナビゲーションより上 */
+        z-index: 999 !important; /* ナビゲーションより上 */
     }
     
     select,
@@ -2328,7 +2328,8 @@ a:focus {
     textarea,
     button {
         position: relative !important;
-        z-index: 300 !important; /* さらに上 */
+        z-index: 9999 !important; /* 確実に最前面 */
+        pointer-events: auto !important;
     }
     
     /* 確実にクリック可能にする */
@@ -2388,5 +2389,52 @@ a:focus {
     form {
         border: 2px solid green !important;
         background: rgba(0, 255, 0, 0.1) !important;
+    }
+}
+
+/* =================================
+   Safari iOS 特別対応
+================================= */
+
+@media (max-width: 768px) {
+    /* select要素のクリック領域を確実に確保 */
+    select {
+        /* 重要: 位置を明確に指定 */
+        position: relative !important;
+        z-index: 99999 !important;
+        
+        /* クリック領域の確保 */
+        min-height: 48px !important;
+        line-height: 48px !important;
+        
+        /* Safari特有の設定 */
+        -webkit-tap-highlight-color: rgba(0, 0, 255, 0.3) !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
+        
+        /* 確実にタッチイベントを受け取る */
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        
+        /* 位置の微調整 */
+        margin: 10px 0 !important;
+        padding: 15px !important;
+        
+        /* 境界を明確に */
+        border: 3px solid blue !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    /* select要素にタッチ可能な疑似要素を追加 */
+    select::after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        z-index: -1;
+        background: rgba(0, 255, 0, 0.2);
+        pointer-events: auto;
     }
 }
