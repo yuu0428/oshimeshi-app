@@ -759,32 +759,6 @@ select {
     touch-action: manipulation;
 }
 
-/* モバイル専用対応 */
-@media (max-width: 768px) {
-    select {
-        /* モバイルではネイティブスタイルを使用 */
-        -webkit-appearance: menulist !important;
-        -moz-appearance: menulist !important;
-        appearance: menulist !important;
-        
-        /* ネイティブ矢印を使用 */
-        background-image: none !important;
-        padding-right: 1rem;
-        
-        /* タッチ操作の最適化 */
-        min-height: 48px; /* Appleのガイドライン準拠 */
-        font-size: 16px; /* iOSでズームを防ぐ */
-    }
-}
-
-/* さらに小さな画面での対応 */
-@media (max-width: 480px) {
-    select {
-        min-height: 52px;
-        padding: 1rem;
-        font-size: 16px; /* 重要：16px未満だとiOSでズームされる */
-    }
-}
 
 input:focus,
 select:focus,
@@ -2185,26 +2159,27 @@ a:focus {
     }
 }
 
+
+
 /* =================================
-   モバイル select要素 修正版
+   モバイル select要素 統合版
 ================================= */
 
-/* モバイルでの select要素 基本設定 */
 @media (max-width: 768px) {
+    /* すべてのselect要素の基本設定 */
     select {
-        /* 重要: iOSズーム防止のため16px以上必須 */
+        /* iOS Safari必須設定 */
         font-size: 16px !important;
-        min-height: 44px !important; /* Appleタッチガイドライン準拠 */
-        padding: 12px 16px !important;
+        min-height: 48px !important;
+        padding: 14px 16px !important;
         margin: 8px 0 !important;
         
-        /* レイアウト設定 */
+        /* レイアウト */
         width: 100% !important;
-        max-width: none !important; /* 最大幅制限を削除 */
         box-sizing: border-box !important;
         display: block !important;
         
-        /* ネイティブ外観を使用 */
+        /* iOS ネイティブ外観 */
         -webkit-appearance: menulist !important;
         -moz-appearance: menulist !important;
         appearance: menulist !important;
@@ -2212,95 +2187,76 @@ a:focus {
         /* 基本スタイル */
         background: white !important;
         background-image: none !important;
-        border: 1px solid #ddd !important;
+        border: 2px solid #007bff !important;
         border-radius: 8px !important;
         color: #333 !important;
         
-        /* 重要: 位置とクリック領域の修正 */
+        /* 位置とイベント */
         position: relative !important;
-        z-index: auto !important; /* 過度に高いz-indexを無効化 */
+        z-index: 1000 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
         
-        /* 重要: 変形やフィルターを無効化 */
+        /* iOS Safari特有の設定 */
+        -webkit-tap-highlight-color: rgba(0, 123, 255, 0.2) !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
+        
+        /* 重要: すべての変形を無効化 */
         transform: none !important;
         filter: none !important;
         backdrop-filter: none !important;
-        will-change: auto !important;
-        
-        /* タッチ操作最適化 */
-        touch-action: manipulation !important;
-        pointer-events: auto !important;
-        cursor: pointer !important;
         
         /* その他 */
+        cursor: pointer !important;
         overflow: visible !important;
-        zoom: 1 !important;
     }
     
     /* フォーカス状態 */
     select:focus {
         outline: 2px solid #007bff !important;
         outline-offset: 2px !important;
-        border-color: #007bff !important;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1) !important;
+        border-color: #0056b3 !important;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2) !important;
     }
     
-    /* 無効状態 */
-    select:disabled {
-        background-color: #f8f9fa !important;
-        color: #6c757d !important;
-        cursor: not-allowed !important;
-        opacity: 0.6 !important;
-    }
-}
-
-/* 小さな画面での追加調整 */
-@media (max-width: 480px) {
-    select {
-        font-size: 16px !important; /* 重要: 16px未満だとiOSでズーム */
-        min-height: 48px !important; /* より大きなタッチターゲット */
-        padding: 14px 16px !important;
-    }
-}
-
-/* input要素も同様に修正 */
-@media (max-width: 768px) {
-    input[type="text"],
-    input[type="password"],
-    input[type="file"],
-    textarea {
-        font-size: 16px !important; /* iOSズーム防止 */
-        min-height: 44px !important;
-        padding: 12px 16px !important;
-        border: 1px solid #ddd !important;
-        border-radius: 8px !important;
-        background: white !important;
-        box-sizing: border-box !important;
-        width: 100% !important;
-        touch-action: manipulation !important;
-        -webkit-appearance: none !important;
+    /* フォーム全体 */
+    form {
+        position: relative !important;
+        z-index: 100 !important;
+        padding: 20px !important;
     }
     
-    textarea {
-        min-height: 100px !important;
-        resize: vertical !important;
-    }
-}
-
-/* フォーム全体の調整 */
-@media (max-width: 768px) {
     form > div {
-        margin-bottom: 1.5rem !important;
+        margin-bottom: 20px !important;
+        position: relative !important;
     }
     
+    /* label調整 */
     label {
-        display: block !important;
-        margin-bottom: 8px !important;
         font-size: 16px !important;
+        margin-bottom: 8px !important;
+        display: block !important;
         font-weight: 500 !important;
         color: #333 !important;
     }
     
-    /* ボタンも調整 */
+    /* その他のinput要素も調整 */
+    input[type="text"],
+    input[type="password"],
+    input[type="file"],
+    textarea {
+        font-size: 16px !important;
+        min-height: 48px !important;
+        padding: 14px 16px !important;
+        border: 2px solid #ddd !important;
+        border-radius: 8px !important;
+        background: white !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+    
+    /* ボタン調整 */
     button[type="submit"],
     input[type="submit"] {
         font-size: 16px !important;
@@ -2310,131 +2266,36 @@ a:focus {
     }
 }
 
-/* =================================
-   モバイル フォーム要素 最優先設定
-================================= */
-
-@media (max-width: 768px) {
-    /* フォーム要素を確実に最前面に */
-    form {
-        position: relative !important;
-        z-index: 999 !important; /* ナビゲーションより上 */
+/* 小画面での追加調整 */
+@media (max-width: 480px) {
+    select {
+        min-height: 52px !important;
+        padding: 16px !important;
+        font-size: 16px !important;
     }
     
-    select,
     input[type="text"],
     input[type="password"],
     input[type="file"],
-    textarea,
-    button {
-        position: relative !important;
-        z-index: 9999 !important; /* 確実に最前面 */
-        pointer-events: auto !important;
-    }
-    
-    /* 確実にクリック可能にする */
-    select {
-        pointer-events: auto !important;
-        touch-action: manipulation !important;
-        -webkit-touch-callout: none !important;
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        user-select: none !important;
-    }
-    
-    /* Safari特有の問題を修正 */
-    select::-webkit-inner-spin-button,
-    select::-webkit-outer-spin-button {
-        -webkit-appearance: none !important;
-        margin: 0 !important;
-    }
-    
-    /* タッチ領域を確実に確保 */
-    select::before {
-        content: '';
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        right: -10px;
-        bottom: -10px;
-        z-index: -1;
+    textarea {
+        min-height: 52px !important;
+        padding: 16px !important;
     }
 }
 
-/* iPhone特有の調整 */
-@supports (-webkit-touch-callout: none) {
-    select {
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
-    }
-}
-
-/* =================================
-   デバッグ用（後で削除）
-================================= */
-
+/* デバッグ用（後で削除予定） */
 @media (max-width: 768px) {
-    /* フォーム要素に赤い枠線 */
     select {
-        border: 3px solid red !important;
-        background: rgba(255, 0, 0, 0.1) !important;
+        border: 3px solid blue !important;
+        background: rgba(255, 255, 255, 0.95) !important;
     }
     
-    /* ナビゲーションに青い背景 */
     nav {
-        background: rgba(0, 0, 255, 0.3) !important;
+        background: rgba(0, 0, 255, 0.2) !important;
     }
     
-    /* フォームに緑の枠線 */
     form {
         border: 2px solid green !important;
-        background: rgba(0, 255, 0, 0.1) !important;
-    }
-}
-
-/* =================================
-   Safari iOS 特別対応
-================================= */
-
-@media (max-width: 768px) {
-    /* select要素のクリック領域を確実に確保 */
-    select {
-        /* 重要: 位置を明確に指定 */
-        position: relative !important;
-        z-index: 99999 !important;
-        
-        /* クリック領域の確保 */
-        min-height: 48px !important;
-        line-height: 48px !important;
-        
-        /* Safari特有の設定 */
-        -webkit-tap-highlight-color: rgba(0, 0, 255, 0.3) !important;
-        -webkit-user-select: none !important;
-        -webkit-touch-callout: none !important;
-        
-        /* 確実にタッチイベントを受け取る */
-        pointer-events: auto !important;
-        touch-action: manipulation !important;
-        
-        /* 位置の微調整 */
-        margin: 10px 0 !important;
-        padding: 15px !important;
-        
-        /* 境界を明確に */
-        border: 3px solid blue !important;
-        background: rgba(255, 255, 255, 0.9) !important;
-    }
-    
-    /* select要素にタッチ可能な疑似要素を追加 */
-    select::after {
-        content: '';
-        position: absolute;
-        top: -5px;
-        left: -5px;
-        right: -5px;
-        bottom: -5px;
-        z-index: -1;
-        background: rgba(0, 255, 0, 0.2);
-        pointer-events: auto;
+        background: rgba(0, 255, 0, 0.05) !important;
     }
 }
