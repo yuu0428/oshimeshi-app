@@ -82,44 +82,4 @@
             <p>検索条件を入力して、お気に入りのグルメを探してみてください ✨</p>
         {% endif %}
     {% endif %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.innerWidth <= 768) {
-        const selects = document.querySelectorAll('select');
-        selects.forEach((select, index) => {
-            console.log(`Select ${index} size:`, {
-                width: select.offsetWidth,
-                height: select.offsetHeight,
-                computedStyle: {
-                    fontSize: getComputedStyle(select).fontSize,
-                    minHeight: getComputedStyle(select).minHeight,
-                    padding: getComputedStyle(select).padding,
-                    maxWidth: getComputedStyle(select).maxWidth
-                }
-            });
-            
-            // サイズ変更監視
-            const observer = new ResizeObserver(entries => {
-                entries.forEach(entry => {
-                    console.log(`Select ${index} resized:`, {
-                        width: entry.contentRect.width,
-                        height: entry.contentRect.height
-                    });
-                });
-            });
-            observer.observe(select);
-            
-            // クリック時のサイズログ
-            select.addEventListener('click', function() {
-                console.log(`Select ${index} clicked - size:`, {
-                    width: this.offsetWidth,
-                    height: this.offsetHeight,
-                    screenWidth: window.innerWidth,
-                    screenHeight: window.innerHeight
-                });
-            });
-        });
-    }
-});
-</script>
 {% endblock %}

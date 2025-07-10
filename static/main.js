@@ -646,31 +646,10 @@ function initializeMobileMenu() {
 
 // 検索・フィルタ機能
 function initializeSearchFilters() {
-    // モバイルではselect要素のイベント干渉を完全に防ぐ
-    if (window.innerWidth <= 768) {
-        console.log('Mobile mode: Disabling select auto-submit');
-        
-        // すべてのselect要素からイベントリスナーを削除
-        const allSelects = document.querySelectorAll('select');
-        allSelects.forEach(select => {
-            // onchange属性を削除
-            select.removeAttribute('onchange');
-            
-            // 既存のイベントリスナーを無効化
-            const newSelect = select.cloneNode(true);
-            select.parentNode.replaceChild(newSelect, select);
-            
-            console.log('Select event listeners removed:', newSelect.name);
-        });
-        
-        return; // モバイルでは以下の処理をスキップ
-    }
-    
-    // デスクトップでの通常処理
     const searchForm = document.querySelector('.search-form form');
     const filterSelects = document.querySelectorAll('select[onchange]');
     
-    // 検索フォームの拡張（デスクトップのみ）
+    // 検索フォームの拡張
     if (searchForm) {
         const searchInput = searchForm.querySelector('input[type="text"]');
         if (searchInput) {
@@ -684,19 +663,24 @@ function initializeSearchFilters() {
         }
     }
 
-    // フィルタ選択の拡張（デスクトップのみ）
+    // フィルタ選択の拡張（モバイルでも動作）
     filterSelects.forEach(select => {
         select.addEventListener('change', function() {
-            const container = document.querySelector('.posts-container, .ranking-container');
-            if (container) {
-                container.style.opacity = '0.5';
-                container.style.transform = 'scale(0.98)';
-                
-                setTimeout(() => {
-                    this.form.submit();
-                }, 150);
-            } else {
+            // モバイルでは即座に送信、デスクトップではアニメーション付き
+            if (window.innerWidth <= 768) {
                 this.form.submit();
+            } else {
+                const container = document.querySelector('.posts-container, .ranking-container');
+                if (container) {
+                    container.style.opacity = '0.5';
+                    container.style.transform = 'scale(0.98)';
+                    
+                    setTimeout(() => {
+                        this.form.submit();
+                    }, 150);
+                } else {
+                    this.form.submit();
+                }
             }
         });
     });
