@@ -880,3 +880,26 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker準備完了');
     });
 }
+
+// モバイルでのlabel-select連携を強制修正
+if (window.innerWidth <= 768) {
+    document.querySelectorAll('label').forEach(label => {
+        const forAttr = label.getAttribute('for');
+        if (forAttr) {
+            const targetSelect = document.getElementById(forAttr);
+            if (targetSelect && targetSelect.tagName === 'SELECT') {
+                // labelクリック時にselectを開く
+                label.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // selectを強制的にフォーカス&クリック
+                    targetSelect.focus();
+                    targetSelect.click();
+                    
+                    console.log('Label clicked, opening select:', forAttr);
+                });
+            }
+        }
+    });
+}

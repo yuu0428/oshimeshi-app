@@ -2220,26 +2220,39 @@ a:focus {
         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2) !important;
     }
     
-    /* フォーム全体 */
-    form {
-        position: relative !important;
-        z-index: 100 !important;
-        padding: 20px !important;
-    }
-    
-    form > div {
-        margin-bottom: 20px !important;
-        position: relative !important;
-    }
-    
-    /* label調整 */
-    label {
-        font-size: 16px !important;
-        margin-bottom: 8px !important;
-        display: block !important;
-        font-weight: 500 !important;
-        color: #333 !important;
-    }
+/* フォーム全体 */
+form {
+    position: relative !important;
+    z-index: 100 !important;
+    padding: 20px !important;
+}
+
+form > div {
+    margin-bottom: 20px !important;
+    position: relative !important;
+}
+
+/* label調整 - 重要: クリックイベントを無効化 */
+label {
+    font-size: 16px !important;
+    margin-bottom: 0px !important; /* マージンを0にして隙間をなくす */
+    display: block !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    pointer-events: none !important; /* labelのクリックを無効化 */
+    position: relative !important;
+    z-index: 10 !important; /* selectより低くする */
+}
+
+/* select要素の位置を強制調整 */
+select {
+    /* 既存の設定に加えて */
+    margin-top: 0px !important;
+    top: 0px !important;
+    left: 0px !important;
+    position: relative !important;
+    z-index: 1000 !important; /* labelより高くする */
+}
     
     /* その他のinput要素も調整 */
     input[type="text"],
