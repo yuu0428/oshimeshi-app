@@ -141,5 +141,17 @@ document.addEventListener('touchstart', function(e) {
 
 // main.jsからのイベントリスナーを一時的に無効化
 debugLog('Checking for interfering event listeners...');
+// onchange属性の確認
+document.querySelectorAll('select').forEach((select, index) => {
+    const onchangeAttr = select.getAttribute('onchange');
+    if (onchangeAttr) {
+        debugLog(`Select ${index} has onchange attribute: ${onchangeAttr}`);
+        // モバイルでは onchange 属性を削除
+        if (window.innerWidth <= 768) {
+            select.removeAttribute('onchange');
+            debugLog(`Select ${index} onchange attribute removed for mobile`);
+        }
+    }
+});
 </script>
 {% endblock %}

@@ -646,10 +646,17 @@ function initializeMobileMenu() {
 
 // 検索・フィルタ機能
 function initializeSearchFilters() {
+    // モバイルでは select要素の自動送信を完全に無効化
+    if (window.innerWidth <= 768) {
+        console.log('Mobile mode: Disabling all select auto-behaviors');
+        return; // モバイルでは何もしない
+    }
+    
+    // デスクトップのみの処理
     const searchForm = document.querySelector('.search-form form');
     const filterSelects = document.querySelectorAll('select[onchange]');
     
-    // 検索フォームの拡張
+    // 検索フォームの拡張（デスクトップのみ）
     if (searchForm) {
         const searchInput = searchForm.querySelector('input[type="text"]');
         if (searchInput) {
@@ -663,24 +670,19 @@ function initializeSearchFilters() {
         }
     }
 
-    // フィルタ選択の拡張（モバイルでも動作）
+    // フィルタ選択の拡張（デスクトップのみ）
     filterSelects.forEach(select => {
         select.addEventListener('change', function() {
-            // モバイルでは即座に送信、デスクトップではアニメーション付き
-            if (window.innerWidth <= 768) {
-                this.form.submit();
-            } else {
-                const container = document.querySelector('.posts-container, .ranking-container');
-                if (container) {
-                    container.style.opacity = '0.5';
-                    container.style.transform = 'scale(0.98)';
-                    
-                    setTimeout(() => {
-                        this.form.submit();
-                    }, 150);
-                } else {
+            const container = document.querySelector('.posts-container, .ranking-container');
+            if (container) {
+                container.style.opacity = '0.5';
+                container.style.transform = 'scale(0.98)';
+                
+                setTimeout(() => {
                     this.form.submit();
-                }
+                }, 150);
+            } else {
+                this.form.submit();
             }
         });
     });
