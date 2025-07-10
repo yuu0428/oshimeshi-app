@@ -82,4 +82,49 @@
             <p>検索条件を入力して、お気に入りのグルメを探してみてください ✨</p>
         {% endif %}
     {% endif %}
+<!-- デバッグ用ログ表示 -->
+<div id="debug-log" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 10px; font-size: 12px; max-height: 150px; overflow-y: auto; z-index: 999999; font-family: monospace;">
+    <div style="font-weight: bold; margin-bottom: 5px;">デバッグログ:</div>
+    <div id="log-content"></div>
+</div>
+
+<script>
+// ログ表示関数
+function debugLog(message) {
+    const logContent = document.getElementById('log-content');
+    const time = new Date().toLocaleTimeString();
+    logContent.innerHTML += `<div>[${time}] ${message}</div>`;
+    logContent.scrollTop = logContent.scrollHeight;
+}
+
+// select要素のイベント監視
+document.querySelectorAll('select').forEach((select, index) => {
+    debugLog(`Select ${index} (${select.name}) found`);
+    
+    select.addEventListener('touchstart', function(e) {
+        debugLog(`Select ${index} touched directly!`);
+    }, { passive: true });
+    
+    select.addEventListener('click', function(e) {
+        debugLog(`Select ${index} clicked directly!`);
+    });
+    
+    select.addEventListener('change', function(e) {
+        debugLog(`Select ${index} changed to: ${this.value}`);
+    });
+    
+    select.addEventListener('focus', function(e) {
+        debugLog(`Select ${index} focused`);
+    });
+});
+
+// label要素のイベント監視
+document.querySelectorAll('label').forEach((label, index) => {
+    label.addEventListener('click', function(e) {
+        debugLog(`Label ${index} clicked`);
+    });
+});
+
+debugLog('Debug system initialized');
+</script>
 {% endblock %}
