@@ -2195,3 +2195,125 @@ a:focus {
         touch-action: auto !important;
     }
 }
+
+/* 
+修正版 style.css - iOS Safari対応
+主要な変更箇所のみ記載（既存のstyle.cssに追加・上書きしてください）
+*/
+
+/* =================================
+   iOS Safari 入力要素の修正
+================================= */
+
+/* すべての入力要素に基本設定を追加 */
+input[type="text"],
+input[type="password"],
+input[type="file"],
+select,
+textarea {
+    /* 既存のスタイルに以下を追加 */
+    position: relative;
+    z-index: 10; /* ナビゲーションより低く設定 */
+    -webkit-tap-highlight-color: transparent; /* タップハイライトを透明に */
+    touch-action: manipulation; /* ダブルタップズームを防ぐ */
+}
+
+/* iOS専用の修正 */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari でのみ適用 */
+    input[type="text"],
+    input[type="password"],
+    input[type="file"],
+    select,
+    textarea {
+        /* タップ領域を確実に確保 */
+        min-height: 44px; /* Apple推奨の最小タップ領域 */
+        -webkit-user-select: text; /* テキスト選択を有効化 */
+    }
+    
+    /* selectタグの特別対応 */
+    select {
+        /* iOSのネイティブ表示を使用 */
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        background-image: none !important; /* カスタム矢印を削除 */
+    }
+}
+
+/* ナビゲーションのz-index調整 */
+nav {
+    /* 既存のスタイルを修正 */
+    z-index: 50; /* 100から50に下げる */
+}
+
+.mobile-menu {
+    /* 既存のスタイルを修正 */
+    z-index: 60; /* 1000から60に下げる */
+}
+
+/* モーダルは高いz-indexを維持 */
+.modal,
+.official-info-modal {
+    z-index: 1000; /* そのまま */
+}
+
+/* フォーム要素のラベル調整 */
+label {
+    /* 既存のスタイルに追加 */
+    cursor: pointer;
+    -webkit-user-select: none; /* ラベルのテキスト選択を防ぐ */
+    user-select: none;
+}
+
+/* iOS用タップ領域の拡大 */
+@media (max-width: 768px) {
+    /* フォーム要素の親要素 */
+    form > div {
+        position: relative;
+        padding: 0.5rem 0; /* タップミスを防ぐための余白 */
+    }
+    
+    input[type="text"],
+    input[type="password"],
+    input[type="file"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 15px !important; /* タップ領域を大きくする */
+        font-size: 16px !important; /* iOS自動ズームを防ぐ */
+        border-radius: 0; /* 角丸をリセット（iOSバグ対策） */
+        -webkit-border-radius: 8px; /* その後で角丸を再設定 */
+        border-radius: 8px;
+    }
+    
+    /* select要素の高さを確保 */
+    select {
+        min-height: 50px !important;
+        line-height: normal !important;
+    }
+}
+
+/* 検索フォーム専用の修正 */
+.search-form {
+    /* 既存のスタイルに追加 */
+    position: relative;
+    z-index: 1; /* 最低限のz-index */
+}
+
+.search-form input,
+.search-form select {
+    position: relative;
+    z-index: 2; /* 親より上に */
+}
+
+/* デバッグ用（問題解決後は削除可） */
+@media (max-width: 768px) {
+    input:focus,
+    select:focus,
+    textarea:focus {
+        /* フォーカス時に視覚的フィードバック */
+        outline: 3px solid #007AFF !important; /* iOS風の青い枠線 */
+        outline-offset: 2px;
+    }
+}
