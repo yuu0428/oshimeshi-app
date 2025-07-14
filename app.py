@@ -168,8 +168,22 @@ def reset_db_command():
     print('Database reset complete.')
 
 # --- ユーザー関連 ---
-FOREIGN_FIRST_NAMES = ["Alex", "Ben", "Chris", "Dana", "Eli", "Finn", "Gaby", "Hael", "Ira", "Jean", "Kim", "Lee", "Max", "Nat", "Oli", "Pat", "Quin", "Ramy", "Sam", "Teo", "Uli", "Val", "Wes", "Xei", "Yael", "Ziv"]
-FOREIGN_LAST_NAMES = ["Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark"]
+FOREIGN_FIRST_NAMES = [
+    "Alex", "Ben", "Chris", "Dana", "Eli", "Finn", "Gaby", "Hael", "Ira", "Jean",
+    "Kim", "Lee", "Max", "Nat", "Oli", "Pat", "Quin", "Ramy", "Sam", "Teo",
+    "Uli", "Val", "Wes", "Xei", "Yael", "Ziv",
+    "Ace", "Ash", "Blue", "Cole", "Dean", "Eden", "Gray", "Hope", "Ivy", "Jay",
+    "Kai", "Luna", "Mika", "Nova"
+]
+
+FOREIGN_LAST_NAMES = [
+    "Smith", "Jones", "Williams", "Brown", "Davis", "Miller", "Wilson", "Moore", 
+    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", 
+    "Thompson", "Garcia", "Martinez", "Robinson", "Clark",
+    "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "King", "Wright", 
+    "Lopez", "Hill", "Scott", "Green", "Adams", "Baker", "Gonzalez", "Nelson", 
+    "Carter", "Mitchell", "Perez", "Roberts"
+]
 
 def generate_random_username():
     return f"{random.choice(FOREIGN_FIRST_NAMES)} {random.choice(FOREIGN_LAST_NAMES)}"
