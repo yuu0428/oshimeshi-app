@@ -2,306 +2,288 @@
 // 既存HTML構造に対応したインタラクション機能
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 初期化処理
-    initializeApp();
-});
-
-// CSRFトークンを取得する関数
-function getCSRFToken() {
-    // まずwindowオブジェクトから取得を試行
-    if (window.csrf_token) {
-        return window.csrf_token;
+    console.log('アプリケーション初期化開始');
+    
+    // CSRFトークン取得関数
+    function getCSRFToken() {
+        if (window.csrf_token) {
+            return window.csrf_token;
+        }
+        const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (metaToken) {
+            return metaToken;
+        }
+        console.warn('CSRFトークンが見つかりません');
+        return '';
     }
     
-    // 次にmetaタグから取得を試行
-    const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    if (metaToken) {
-        return metaToken;
-    }
-    
-    console.warn('CSRFトークンが見つかりません');
-    return '';
-}
-
-// アプリケーション初期化
-function initializeApp() {
-    initializeAnimations();
+    // 1. いいね機能のみ初期化
     initializeLikeButtons();
+    
+    // 2. モーダル機能初期化
     initializeModals();
-    initializeFormsValidation();
+    
+    // 3. モバイルメニュー初期化
     initializeMobileMenu();
-    initializeSearchFilters();
+    
+    // 4. 画像プレビュー初期化
     initializeImagePreview();
+    
+    // 5. フォーム関連の処理は最小限に
+    initializeMinimalForms();
+    
+    // 6. アニメーション初期化
+    initializeAnimations();
+    
+    // 7. スクロール効果
     initializeScrollEffects();
-}
 
-// スムーズアニメーション初期化
-function initializeAnimations() {
-    // カード要素のフェードインアニメーション
-    const cards = document.querySelectorAll('.post-card, .ranking-item');
+    // === 関数定義 ===
     
-    if (cards.length > 0) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
-        cards.forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
-    }
-}
-
-// いいね機能
-function initializeLikeButtons() {
-    const likeButtons = document.querySelectorAll('.like-button');
-    
-    likeButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleLike(this);
-        });
-    });
-}
-
-function toggleLike(button) {
-    const postId = button.getAttribute('data-post-id');
-    const heartIcon = button.querySelector('.heart-icon') || button.querySelector('span:first-child');
-    const likeCount = button.querySelector('span:last-child');
-    const currentCount = parseInt(likeCount?.textContent || '0');
-    
-    // ローカル状態の更新（即座にUI反映）
-    if (button.classList.contains('liked')) {
-        button.classList.remove('liked');
-        if (heartIcon) heartIcon.textContent = '🤍';
-        if (likeCount) likeCount.textContent = Math.max(0, currentCount - 1);
-    } else {
-        button.classList.add('liked');
-        if (heartIcon) heartIcon.textContent = '❤️';
-        if (likeCount) likeCount.textContent = currentCount + 1;
+    // スムーズアニメーション初期化
+    function initializeAnimations() {
+        // カード要素のフェードインアニメーション
+        const cards = document.querySelectorAll('.post-card, .ranking-item');
         
-        // ハートビートアニメーション
-        if (heartIcon) {
-            heartIcon.style.animation = 'heartBeat 0.6s ease';
-            setTimeout(() => {
-                heartIcon.style.animation = '';
-            }, 600);
-        }
-    }
+        if (cards.length > 0) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
 
-    // サーバーへのリクエスト（非同期）
-    if (postId) {
-        const csrfToken = getCSRFToken();
-    
-        fetch(`/like/${postId}`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrfToken
-            },
-            body: `csrf_token=${encodeURIComponent(csrfToken)}`,
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'ok' && likeCount) {
-                likeCount.textContent = data.like_count;
-                // ハートの状態も更新
-                if (heartIcon) {
-                    heartIcon.textContent = data.is_liked ? '❤️' : '🤍';
-                }
-            }
-        })
-        .catch(error => {
-            console.error('いいね処理エラー:', error);
-            // エラー時は元の状態に戻す
-            toggleLike(button);
-        });
-    }
-}
-
-// モーダル機能
-function initializeModals() {
-    // 管理者ログインモーダル
-    const adminLoginBtn = document.getElementById('adminLoginBtn');
-    const adminModal = document.getElementById('adminModal');
-    const closeModal = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-
-    if (adminLoginBtn && adminModal) {
-        adminLoginBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openModal(adminModal);
-        });
-    }
-
-    if (closeModal && adminModal) {
-        closeModal.addEventListener('click', function() {
-            closeModalFunc(adminModal);
-        });
-    }
-
-    if (cancelBtn && adminModal) {
-        cancelBtn.addEventListener('click', function() {
-            closeModalFunc(adminModal);
-        });
-    }
-
-    // モーダル外クリックで閉じる
-    if (adminModal) {
-        adminModal.addEventListener('click', function(e) {
-            if (e.target === adminModal) {
-                closeModalFunc(adminModal);
-            }
-        });
-    }
-
-    // 🆕 公式情報モーダル
-    initializeOfficialInfoModal();
-
-    // ESCキーでモーダルを閉じる
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const openModals = document.querySelectorAll('.modal[style*="display: block"], .modal[style*="display:block"], .official-info-modal[style*="display: block"]');
-            openModals.forEach(modal => {
-                if (modal.classList.contains('official-info-modal')) {
-                    closeOfficialModal(modal);
-                } else {
-                    closeModalFunc(modal);
-                }
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
             });
         }
-    });
+    }
 
-    // 投稿詳細モーダル
-    initializePostDetailModal();
-}
-
-// 投稿詳細モーダルの初期化
-function initializePostDetailModal() {
-    const postCards = document.querySelectorAll('.post-card');
-    const postModal = document.getElementById('postDetailModal');
-    const closeBtn = document.getElementById('closePostModal');
-    
-    if (!postModal) return;
-
-    // 投稿カードクリックイベント
-    postCards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            // いいねボタンや削除ボタンがクリックされた場合は除外
-            if (e.target.closest('.like-button, .delete-button')) {
-                return;
-            }
+    // いいね機能
+    function initializeLikeButtons() {
+        document.addEventListener('click', function(e) {
+            const likeButton = e.target.closest('.like-button');
+            if (!likeButton) return;
             
             e.preventDefault();
-            showPostDetail(this);
+            toggleLike(likeButton);
+        });
+    }
+    
+    function toggleLike(button) {
+        const postId = button.getAttribute('data-post-id');
+        const heartIcon = button.querySelector('.heart-icon') || button.querySelector('span:first-child');
+        const likeCount = button.querySelector('span:last-child');
+        const currentCount = parseInt(likeCount?.textContent || '0');
+        
+        // UI更新
+        if (button.classList.contains('liked')) {
+            button.classList.remove('liked');
+            if (heartIcon) heartIcon.textContent = '🤍';
+            if (likeCount) likeCount.textContent = Math.max(0, currentCount - 1);
+        } else {
+            button.classList.add('liked');
+            if (heartIcon) heartIcon.textContent = '❤️';
+            if (likeCount) likeCount.textContent = currentCount + 1;
+        }
+        
+        // サーバーリクエスト
+        if (postId) {
+            const csrfToken = getCSRFToken();
+            fetch(`/like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken
+                },
+                body: `csrf_token=${encodeURIComponent(csrfToken)}`,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok' && likeCount) {
+                    likeCount.textContent = data.like_count;
+                    if (heartIcon) {
+                        heartIcon.textContent = data.is_liked ? '❤️' : '🤍';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('いいね処理エラー:', error);
+                toggleLike(button); // エラー時は元に戻す
+            });
+        }
+    }
+    
+    // モーダル機能
+    function initializeModals() {
+        // 管理者モーダル
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminModal = document.getElementById('adminModal');
+        
+        if (adminLoginBtn && adminModal) {
+            adminLoginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                adminModal.style.display = 'block';
+            });
+        }
+        
+        // モーダルを閉じる処理
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal') || 
+                e.target.id === 'closeModal' || 
+                e.target.id === 'cancelBtn') {
+                const modal = e.target.closest('.modal') || document.querySelector('.modal[style*="block"]');
+                if (modal) modal.style.display = 'none';
+            }
         });
         
-        // カードにカーソルスタイルを適用
-        card.style.cursor = 'pointer';
-    });
+        // 公式情報モーダル
+        const officialBtns = document.querySelectorAll('#officialInfoBtn, #officialInfoBtnMobile');
+        const officialModal = document.getElementById('officialInfoModal');
+        
+        officialBtns.forEach(btn => {
+            if (btn && officialModal) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    officialModal.style.display = 'block';
+                });
+            }
+        });
+        
+        // ESCキーでモーダルを閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal[style*="display: block"], .official-info-modal[style*="display: block"]');
+                openModals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });
+        
+        // 投稿詳細モーダル
+        initializePostDetailModal();
+    }
 
-    // モーダル閉じるボタン
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            closeModalFunc(postModal);
+    // 投稿詳細モーダルの初期化
+    function initializePostDetailModal() {
+        const postCards = document.querySelectorAll('.post-card');
+        const postModal = document.getElementById('postDetailModal');
+        const closeBtn = document.getElementById('closePostModal');
+        
+        if (!postModal) return;
+
+        // 投稿カードクリックイベント
+        postCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // いいねボタンや削除ボタンがクリックされた場合は除外
+                if (e.target.closest('.like-button, .delete-button')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                showPostDetail(this);
+            });
+            
+            // カードにカーソルスタイルを適用
+            card.style.cursor = 'pointer';
+        });
+
+        // モーダル閉じるボタン
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                postModal.style.display = 'none';
+            });
+        }
+
+        // モーダル外クリックで閉じる
+        postModal.addEventListener('click', function(e) {
+            if (e.target === postModal) {
+                postModal.style.display = 'none';
+            }
         });
     }
 
-    // モーダル外クリックで閉じる
-    postModal.addEventListener('click', function(e) {
-        if (e.target === postModal) {
-            closeModalFunc(postModal);
+    // 投稿詳細をモーダルで表示
+    function showPostDetail(cardElement) {
+        const modal = document.getElementById('postDetailModal');
+        if (!modal) return;
+
+        // カードからデータを取得
+        const image = cardElement.querySelector('.post-image');
+        const storeName = cardElement.querySelector('h3').textContent;
+        const postMeta = cardElement.querySelector('.post-meta');
+        const caption = cardElement.querySelector('.post-caption').textContent;
+        const likeButton = cardElement.querySelector('.like-button');
+        
+        // 地域、価格帯、投稿者、高校情報を抽出
+        const metaText = postMeta.textContent;
+        const areaMatch = metaText.match(/地域:\s*([^|]+)/);
+        const priceMatch = metaText.match(/価格帯:\s*([^|]+)/);
+        const userMatch = metaText.match(/投稿者:\s*([^|]+)/);
+        const schoolMatch = metaText.match(/高校:\s*(.+)/);
+        
+        const area = areaMatch ? areaMatch[1].trim() : '';
+        const priceRange = priceMatch ? priceMatch[1].trim() : '';
+        const username = userMatch ? userMatch[1].trim() : '';
+        const school = schoolMatch ? schoolMatch[1].trim() : '';
+
+        // モーダル内容を更新
+        const modalImage = modal.querySelector('.modal-image');
+        const modalStoreName = modal.querySelector('.modal-store-name');
+        const modalArea = modal.querySelector('.modal-area');
+        const modalPrice = modal.querySelector('.modal-price');
+        const modalUser = modal.querySelector('.modal-user');
+        const modalSchool = modal.querySelector('.modal-school');
+        const modalCaption = modal.querySelector('.modal-caption');
+        const modalLikeButton = modal.querySelector('.modal-like-button');
+
+        // 画像
+        if (image && modalImage) {
+            modalImage.src = image.src;
+            modalImage.alt = image.alt;
+            modalImage.style.display = 'block';
+        } else if (modalImage) {
+            modalImage.style.display = 'none';
         }
-    });
-}
 
-// 投稿詳細をモーダルで表示
-function showPostDetail(cardElement) {
-    const modal = document.getElementById('postDetailModal');
-    if (!modal) return;
-
-    // カードからデータを取得
-    const image = cardElement.querySelector('.post-image');
-    const storeName = cardElement.querySelector('h3').textContent;
-    const postMeta = cardElement.querySelector('.post-meta');
-    const caption = cardElement.querySelector('.post-caption').textContent;
-    const likeButton = cardElement.querySelector('.like-button');
-    
-    // 地域、価格帯、投稿者、高校情報を抽出
-    const metaText = postMeta.textContent;
-    const areaMatch = metaText.match(/地域:\s*([^|]+)/);
-    const priceMatch = metaText.match(/価格帯:\s*([^|]+)/);
-    const userMatch = metaText.match(/投稿者:\s*([^|]+)/);
-    const schoolMatch = metaText.match(/高校:\s*(.+)/);
-    
-    const area = areaMatch ? areaMatch[1].trim() : '';
-    const priceRange = priceMatch ? priceMatch[1].trim() : '';
-    const username = userMatch ? userMatch[1].trim() : '';
-    const school = schoolMatch ? schoolMatch[1].trim() : '';
-
-    // モーダル内容を更新
-    const modalImage = modal.querySelector('.modal-image');
-    const modalStoreName = modal.querySelector('.modal-store-name');
-    const modalArea = modal.querySelector('.modal-area');
-    const modalPrice = modal.querySelector('.modal-price');
-    const modalUser = modal.querySelector('.modal-user');
-    const modalSchool = modal.querySelector('.modal-school');
-    const modalCaption = modal.querySelector('.modal-caption');
-    const modalLikeButton = modal.querySelector('.modal-like-button');
-
-    // 画像
-    if (image && modalImage) {
-        modalImage.src = image.src;
-        modalImage.alt = image.alt;
-        modalImage.style.display = 'block';
-    } else if (modalImage) {
-        modalImage.style.display = 'none';
-    }
-
-    // テキスト情報
-    if (modalStoreName) modalStoreName.textContent = storeName;
-    if (modalArea) modalArea.textContent = area;
-    if (modalPrice) modalPrice.textContent = priceRange;
-    if (modalUser) modalUser.textContent = username;
-    if (modalSchool) {
-        if (school) {
-            modalSchool.textContent = school;
-            modalSchool.parentElement.style.display = 'block';
-        } else {
-            modalSchool.parentElement.style.display = 'none';
+        // テキスト情報
+        if (modalStoreName) modalStoreName.textContent = storeName;
+        if (modalArea) modalArea.textContent = area;
+        if (modalPrice) modalPrice.textContent = priceRange;
+        if (modalUser) modalUser.textContent = username;
+        if (modalSchool) {
+            if (school) {
+                modalSchool.textContent = school;
+                modalSchool.parentElement.style.display = 'block';
+            } else {
+                modalSchool.parentElement.style.display = 'none';
+            }
         }
-    }
-    if (modalCaption) modalCaption.textContent = caption;
+        if (modalCaption) modalCaption.textContent = caption;
 
-    // いいねボタン
-    if (modalLikeButton && likeButton) {
-        modalLikeButton.className = likeButton.className;
-        modalLikeButton.setAttribute('data-post-id', likeButton.getAttribute('data-post-id'));
-        modalLikeButton.innerHTML = likeButton.innerHTML;
-    }
+        // いいねボタン
+        if (modalLikeButton && likeButton) {
+            modalLikeButton.className = likeButton.className;
+            modalLikeButton.setAttribute('data-post-id', likeButton.getAttribute('data-post-id'));
+            modalLikeButton.innerHTML = likeButton.innerHTML;
+        }
 
-    // モーダルを表示
-    openModal(modal);
-}
+        // モーダルを表示
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 
 // 🆕 公式情報モーダル初期化
 function initializeOfficialInfoModal() {
@@ -575,94 +557,34 @@ function clearFieldError(field) {
     }
 }
 
-// モバイルメニュー
-function initializeMobileMenu() {
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    const hamburgerIcon = mobileMenuBtn?.querySelector('.hamburger-icon');
-    
-    if (!mobileMenuBtn || !mobileMenu) {
-        console.warn('モバイルメニューの要素が見つかりません');
-        return;
-    }
-
-    // メニューボタンクリックイベント
-    mobileMenuBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleMobileMenu();
-    });
-
-    // メニュー項目クリック時にメニューを閉じる
-    const menuItems = mobileMenu.querySelectorAll('a, button');
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
-            closeMobileMenu();
+    // モバイルメニュー（シンプル版）
+    function initializeMobileMenu() {
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (!mobileMenuBtn || !mobileMenu) return;
+        
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            mobileMenu.classList.toggle('show');
+            
+            const isOpen = mobileMenu.classList.contains('show');
+            const icon = this.querySelector('.hamburger-icon');
+            if (icon) {
+                icon.textContent = isOpen ? '✕' : '☰';
+            }
         });
-    });
-
-    // 画面外クリックでメニューを閉じる
-    document.addEventListener('click', function(e) {
-        if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-            closeMobileMenu();
-        }
-    });
-
-    // ESCキーでメニューを閉じる
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && mobileMenu.classList.contains('show')) {
-            closeMobileMenu();
-        }
-    });
-
-    // 画面サイズ変更時の処理
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && mobileMenu.classList.contains('show')) {
-            closeMobileMenu();
-        }
-    });
-
-    // メニュー開閉関数
-    function toggleMobileMenu() {
-        const isOpen = mobileMenu.classList.contains('show');
         
-        if (isOpen) {
-            closeMobileMenu();
-        } else {
-            openMobileMenu();
-        }
+        // メニュー外クリックで閉じる
+        document.addEventListener('click', function(e) {
+            if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                mobileMenu.classList.remove('show');
+                const icon = mobileMenuBtn.querySelector('.hamburger-icon');
+                if (icon) icon.textContent = '☰';
+            }
+        });
     }
-
-    function openMobileMenu() {
-        mobileMenu.classList.add('show');
-        if (hamburgerIcon) {
-            hamburgerIcon.textContent = '✕';
-        }
-        mobileMenuBtn.setAttribute('aria-expanded', 'true');
-        document.body.style.overflow = 'hidden'; // スクロール防止
-        
-        // フォーカス管理
-        const firstMenuItem = mobileMenu.querySelector('a, button');
-        if (firstMenuItem) {
-            setTimeout(() => firstMenuItem.focus(), 100);
-        }
-    }
-
-    function closeMobileMenu() {
-        mobileMenu.classList.remove('show');
-        if (hamburgerIcon) {
-            hamburgerIcon.textContent = '☰';
-        }
-        mobileMenuBtn.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = 'auto'; // スクロール復元
-        mobileMenuBtn.focus(); // フォーカスをボタンに戻す
-    }
-
-    // 初期設定
-    mobileMenuBtn.setAttribute('aria-expanded', 'false');
-    mobileMenuBtn.setAttribute('aria-controls', 'mobileMenu');
-    mobileMenu.setAttribute('aria-hidden', 'true');
-}
 
 // iOS Safariの検出
 function isiOSSafari() {
@@ -750,138 +672,103 @@ function performSearch(query) {
 }
 
 // 画像プレビュー機能
-function initializeImagePreview() {
-    const imageInput = document.getElementById('image');
-    if (!imageInput) return;
-
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // ファイルタイプチェック
-        if (!file.type.match('image.*')) {
-            alert('画像ファイルを選択してください');
-            this.value = '';
-            return;
-        }
-
-        // ファイルサイズチェック（5MB制限）
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            alert('ファイルサイズは5MB以下にしてください');
-            this.value = '';
-            return;
-        }
-
-        // プレビュー表示
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            showImagePreview(e.target.result);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function showImagePreview(src) {
+function showImagePreview(src, inputElement) {
     // 既存のプレビューを削除
     const existingPreview = document.querySelector('.image-preview');
-    if (existingPreview) {
-        existingPreview.remove();
-    }
-
-    // プレビュー要素を作成
+    if (existingPreview) existingPreview.remove();
+    
+    // 新しいプレビューを作成
     const preview = document.createElement('div');
     preview.className = 'image-preview';
-    preview.style.cssText = `
-        margin-top: 1rem;
-        text-align: center;
-        position: relative;
-        display: inline-block;
+    preview.style.cssText = 'position: relative; margin-top: 1rem;';
+    preview.innerHTML = `
+        <img src="${src}" style="max-width: 300px; max-height: 200px; border-radius: 8px;">
+        <button type="button" class="remove-preview" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">✕</button>
     `;
-
-    const img = document.createElement('img');
-    img.src = src;
-    img.style.cssText = `
-        max-width: 300px;
-        max-height: 200px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        object-fit: cover;
-        display: block;
-    `;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.innerHTML = '✕';
-    removeBtn.style.cssText = `
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: rgba(255, 107, 107, 0.8);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        font-size: 14px;
-        line-height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-        transition: background 0.2s ease;
-    `;
-    removeBtn.onmouseover = () => { removeBtn.style.background = '#ff6b6b'; };
-    removeBtn.onmouseout = () => { removeBtn.style.background = 'rgba(255, 107, 107, 0.8)'; };
-
-    removeBtn.addEventListener('click', function() {
-        document.getElementById('image').value = '';
+    
+    inputElement.parentElement.appendChild(preview);
+    
+    // 削除ボタン
+    preview.querySelector('.remove-preview').addEventListener('click', function() {
+        inputElement.value = '';
         preview.remove();
     });
-
-    preview.appendChild(img);
-    preview.appendChild(removeBtn);
-
-    // 画像入力フィールドの後に挿入
-    const imageInput = document.getElementById('image');
-    imageInput.parentElement.appendChild(preview);
 }
 
-// スクロール効果
-function initializeScrollEffects() {
-    const header = document.querySelector('nav, .header');
-    if (!header) return;
-
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-
-    function updateHeader() {
-        const scrollY = window.scrollY;
+    // 最小限のフォーム処理
+    function initializeMinimalForms() {
+        // CSRFトークンの確認のみ
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const csrfToken = getCSRFToken();
+                if (!csrfToken) {
+                    e.preventDefault();
+                    alert('セキュリティトークンが見つかりません。ページを更新してください。');
+                    return false;
+                }
+                
+                // CSRFトークンをフォームに追加
+                let csrfInput = form.querySelector('input[name="csrf_token"]');
+                if (!csrfInput) {
+                    csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrf_token';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
+                }
+            });
+        });
         
-        if (scrollY > 100) {
-            header.style.background = 'rgba(253, 252, 248, 0.95)';
-            header.style.backdropFilter = 'blur(10px)';
-            header.style.boxShadow = '0 2px 20px rgba(164, 165, 132, 0.1)';
-        } else {
-            header.style.background = 'rgba(253, 252, 248, 0.8)';
-            header.style.backdropFilter = 'blur(5px)';
-            header.style.boxShadow = 'none';
-        }
-
-        lastScrollY = scrollY;
-        ticking = false;
-    }
-
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(updateHeader);
-            ticking = true;
+        // モバイルデバイスの場合、select要素の自動送信を無効化
+        if (window.innerWidth <= 768) {
+            document.querySelectorAll('select[onchange]').forEach(select => {
+                select.removeAttribute('onchange');
+            });
         }
     }
 
-    window.addEventListener('scroll', requestTick);
-}
+// エラーハンドリング
+window.addEventListener('error', function(e) {
+    console.error('JavaScript Error:', e.error);
+});
+
+    // スクロール効果
+    function initializeScrollEffects() {
+        const header = document.querySelector('nav');
+        if (!header) return;
+
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        function updateHeader() {
+            const scrollY = window.scrollY;
+            
+            if (scrollY > 100) {
+                header.style.background = 'rgba(253, 252, 248, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+                header.style.boxShadow = '0 2px 20px rgba(164, 165, 132, 0.1)';
+            } else {
+                header.style.background = 'rgba(253, 252, 248, 0.8)';
+                header.style.backdropFilter = 'blur(5px)';
+                header.style.boxShadow = 'none';
+            }
+
+            lastScrollY = scrollY;
+            ticking = false;
+        }
+
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+    }
+
+    console.log('アプリケーション初期化完了');
+});
 
 // ユーティリティ関数
 function debounce(func, wait) {
@@ -909,10 +796,6 @@ function throttle(func, limit) {
     };
 }
 
-// エラーハンドリング
-window.addEventListener('error', function(e) {
-    console.error('JavaScript Error:', e.error);
-});
 
 // パフォーマンス最適化
 if ('requestIdleCallback' in window) {

@@ -22,7 +22,7 @@
     {% if ranking_type == 'school' %}
         <!-- 高校選択ドロップダウン -->
         <div class="school-selector">
-            <form method="GET" class="school-form">
+            <form method="GET" class="school-form" action="{{ url_for('ranking') }}">
                 <input type="hidden" name="type" value="school">
                 <div class="form-group">
                     <label for="school">🏫 高校を選択:</label>
@@ -34,6 +34,7 @@
                             </option>
                         {% endfor %}
                     </select>
+                    <button type="submit" class="school-submit-btn">表示</button>
                 </div>
             </form>
         </div>
@@ -58,6 +59,7 @@
         <div class="ranking-container">
             {% for post in posts %}
                 <div class="ranking-item">
+                    <!-- 以下は変更なし -->
                     <!-- ランキングバッジ -->
                     {% if loop.index <= 3 %}
                         <div class="ranking-badge rank-{{ loop.index }}">
@@ -125,4 +127,52 @@
             <a href="{{ url_for('post') }}" class="cta-button">投稿する</a>
         </div>
     {% endif %}
+
+<style>
+/* このページ専用の修正 */
+.school-form .form-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.school-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.school-form .school-select {
+    min-width: 300px;
+    flex: 1;
+}
+
+.school-submit-btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #A4A584, #8E8E93);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .school-form .form-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .school-form .school-select {
+        min-width: auto;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .school-submit-btn {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

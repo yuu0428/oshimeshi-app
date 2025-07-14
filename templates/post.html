@@ -3,29 +3,34 @@
 {% block content %}
     <h1>推しメシを投稿 🍴</h1>
     <p>ようこそ、{{ username }} さん！あなたのおすすめのお店を教えてください ✨</p>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="post-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div>
+        
+        <div class="form-group">
             <label for="image">📸 写真 (JPEG/PNG):</label>
             <input type="file" id="image" name="image" accept="image/jpeg, image/png" required>
         </div>
-        <div>
+        
+        <div class="form-group">
             <label for="store_name">🏪 店名:</label>
             <input type="text" id="store_name" name="store_name" value="{{ store_name }}" required maxlength="50">
         </div>
-        <div>
+        
+        <div class="form-group">
             <label for="area">📍 地域 (例: 山梨県◯◯市):</label>
             <input type="text" id="area" name="area" value="{{ area }}" required>
         </div>
-        <div>
+        
+        <div class="form-group">
             <label for="price_range">💰 価格帯:</label>
-            <select id="price_range" name="price_range">
+            <select id="price_range" name="price_range" required>
                 {% for option in price_options %}
                 <option value="{{ option }}" {% if option == price_range_selected %}selected{% endif %}>{{ option }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div>
+        
+        <div class="form-group">
             <label for="school">🏫 高校 (任意):</label>
             <select id="school" name="school">
                 <option value="">選択なし</option>
@@ -34,10 +39,36 @@
                 {% endfor %}
             </select>
         </div>
-        <div>
+        
+        <div class="form-group">
             <label for="caption">📝 紹介文・コメント:</label>
             <textarea id="caption" name="caption" rows="5" required maxlength="500">{{ caption }}</textarea>
         </div>
-        <button type="submit">投稿する 🚀</button>
+        
+        <div class="form-group">
+            <button type="submit">投稿する 🚀</button>
+        </div>
     </form>
+
+<style>
+/* このページ専用のフォーム修正 */
+.post-form .form-group {
+    margin-bottom: 1.5rem;
+    clear: both;
+}
+
+.post-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.post-form input,
+.post-form select,
+.post-form textarea {
+    display: block;
+    width: 100%;
+    margin-top: 0;
+}
+</style>
 {% endblock %}
