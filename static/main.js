@@ -2,7 +2,7 @@
 // 既存HTML構造に対応したインタラクション機能
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('アプリケーション初期化開始');
+    //console.log('アプリケーション初期化開始');
     
     // CSRFトークン取得関数
     function getCSRFToken() {
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return '';
     }
     
-    // 1. いいね機能のみ初期化
+    // 1. いいね機能初期化
     initializeLikeButtons();
     
     // 2. モーダル機能初期化
@@ -557,7 +557,7 @@ function clearFieldError(field) {
     }
 }
 
-    // モバイルメニュー（シンプル版）
+    // モバイルメニュー
     function initializeMobileMenu() {
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -595,11 +595,11 @@ function isiOSSafari() {
     return iOSSafari;
 }
 
-// 検索・フィルタ機能の修正版
+// 検索・フィルタ機能
 function initializeSearchFilters() {
     // iOS Safariの場合は特別な処理を行わない
     if (isiOSSafari()) {
-        console.log('iOS Safari detected: Using native form controls');
+        //console.log('iOS Safari detected: Using native form controls');
         
         // すべてのselect要素からonchange属性を削除
         document.querySelectorAll('select[onchange]').forEach(select => {
@@ -622,7 +622,7 @@ function initializeSearchFilters() {
         return; // iOS Safariでは以降の処理をスキップ
     }
     
-    // デスクトップのみの処理（既存のコード）
+    // デスクトップのみの処理
     const searchForm = document.querySelector('.search-form form');
     const filterSelects = document.querySelectorAll('select[onchange]');
     
@@ -767,7 +767,7 @@ window.addEventListener('error', function(e) {
         window.addEventListener('scroll', requestTick);
     }
 
-    console.log('アプリケーション初期化完了');
+    //console.log('アプリケーション初期化完了');
 });
 
 // ユーティリティ関数
@@ -801,7 +801,7 @@ function throttle(func, limit) {
 if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
         // 非重要な初期化処理
-        console.log('推しメシアプリが正常に初期化されました');
+        //console.log('推しメシアプリが正常に初期化されました');
     });
 }
 
@@ -809,7 +809,7 @@ if ('requestIdleCallback' in window) {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         // 将来的なPWA化に備えた準備
-        console.log('Service Worker準備完了');
+        //console.log('Service Worker準備完了');
     });
 }
 

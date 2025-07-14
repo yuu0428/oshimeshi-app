@@ -53,11 +53,4 @@
                 </div>
             {% endfor %}
         </div>
-    {% else %}
-        <div class="empty-state">
-            <div class="empty-icon">📢</div>
-            <p>まだ広告掲載投稿がありません。</p>
-            <a href="{{ url_for('post') }}" class="cta-button">投稿する</a>
-        </div>
-    {% endif %}
 {% endblock %}

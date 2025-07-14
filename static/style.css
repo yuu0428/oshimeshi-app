@@ -51,7 +51,7 @@ nav {
 @media (max-width: 768px) {
     nav {
         height: 80px; /* モバイルでは少し高く */
-        z-index: 1; /* さらにz-indexを下げる */
+        z-index: 1; /* z-indexを下げる */
     }
 }
 
@@ -846,7 +846,7 @@ select:disabled {
     align-self: end;
 }
 
-/* ランキングページ以外の投稿カード用スタイル（beforeの内容を復元） */
+/* ランキングページ以外の投稿カード用スタイル */
 .posts-container .post-card {
     background: rgba(255, 255, 255, 0.8);
     border-radius: 16px;
@@ -2198,7 +2198,6 @@ a:focus {
 
 /* 
 修正版 style.css - iOS Safari対応
-主要な変更箇所のみ記載（既存のstyle.cssに追加・上書きしてください）
 */
 
 /* =================================
@@ -2307,20 +2306,8 @@ label {
     z-index: 2; /* 親より上に */
 }
 
-/* デバッグ用（問題解決後は削除可） */
-@media (max-width: 768px) {
-    input:focus,
-    select:focus,
-    textarea:focus {
-        /* フォーカス時に視覚的フィードバック */
-        outline: 3px solid #007AFF !important; /* iOS風の青い枠線 */
-        outline-offset: 2px;
-    }
-}
 
-/* 緊急修正: Label-Input重なり問題の解決 */
-/* style.cssの最後に追加してください */
-
+/* Label-Input重なり問題の解決 */
 /* 1. フォームのdiv構造を修正 */
 form > div {
     position: relative;
@@ -2446,16 +2433,4 @@ body {
     /* ナビゲーションの高さ分の余白を確保 */
     padding-top: 70px !important;
     margin-top: 0 !important;
-}
-
-/* 9. デバッグ用の可視化（問題解決後は削除） */
-
-form > div {
-    border: 2px solid blue !important;
-}
-label {
-    background: rgba(255, 0, 0, 0.1) !important;
-}
-input, select, textarea {
-    background: rgba(0, 255, 0, 0.1) !important;
 }
