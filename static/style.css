@@ -2434,3 +2434,32 @@ body {
     padding-top: 70px !important;
     margin-top: 0 !important;
 }
+
+/* 画像プレビュー専用スタイル */
+.image-preview {
+    position: relative !important;
+    z-index: 10 !important;
+    margin-top: 1rem !important;
+}
+
+.image-preview img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.remove-preview {
+    position: absolute !important;
+    z-index: 11 !important;
+    cursor: pointer !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .image-preview {
+        text-align: center;
+    }
+    
+    .image-preview img {
+        max-width: 250px !important;
+    }
+}

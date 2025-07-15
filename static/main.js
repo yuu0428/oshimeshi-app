@@ -3,6 +3,17 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     //console.log('アプリケーション初期化開始');
+
+    // フリーズ防止のための安全対策
+    document.addEventListener('click', function(e) {
+        // 透明なオーバーレイがある場合は削除
+        const invisibleOverlays = document.querySelectorAll('[style*="z-index: 999"], [style*="z-index: 1000"]');
+        invisibleOverlays.forEach(overlay => {
+            if (overlay.style.opacity === '0' || overlay.style.display === 'none') {
+                overlay.remove();
+            }
+        });
+    }, true);
     
     // CSRFトークン取得関数
     function getCSRFToken() {
@@ -128,36 +139,55 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 画像プレビュー機能
     function initializeImagePreview() {
-        const imageInput = document.querySelector('input[type="file"]');
+        const imageInput = document.querySelector('input[type="file"][name="image"]');
         if (!imageInput) return;
-    
-        imageInput.addEventListener('change', function(e) {
+
+        // 既存のイベントリスナーをクリア
+        const newInput = imageInput.cloneNode(true);
+        imageInput.parentNode.replaceChild(newInput, imageInput);
+
+        newInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-        
+    
             // ファイル形式チェック
             if (!file.type.match(/^image\/(jpeg|jpg|png)$/i)) {
                 alert('JPEG、PNG形式の画像のみ対応しています。');
                 this.value = '';
                 return;
             }
-        
+    
             // ファイルサイズチェック（10MB）
             if (file.size > 10 * 1024 * 1024) {
                 alert('ファイルサイズは10MB以下にしてください。');
                 this.value = '';
                 return;
             }
-        
+    
+            // プレビュー表示の前に既存のプレビューを削除
+            const existingPreview = document.querySelector('.image-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+    
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    showImagePreview(e.target.result, imageInput);
+                    // 少し遅延を入れてDOMの準備を確実にする
+                    setTimeout(() => {
+                        showImagePreview(e.target.result, newInput);
+                    }, 50);
                 } catch (error) {
                     console.error('プレビュー表示エラー:', error);
                     alert('プレビューの表示に失敗しました。');
                 }
             };
+        
+            reader.onerror = function() {
+                alert('画像の読み込みに失敗しました。');
+                newInput.value = '';
+            };
+        
             reader.readAsDataURL(file);
         });
     }
@@ -167,23 +197,72 @@ document.addEventListener('DOMContentLoaded', function() {
         // 既存のプレビューを削除
         const existingPreview = document.querySelector('.image-preview');
         if (existingPreview) existingPreview.remove();
-    
+
         // 新しいプレビューを作成
         const preview = document.createElement('div');
         preview.className = 'image-preview';
-        preview.style.cssText = 'position: relative; margin-top: 1rem;';
-        preview.innerHTML = `
-            <img src="${src}" style="max-width: 300px; max-height: 200px; border-radius: 8px;">
-            <button type="button" class="remove-preview" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">✕</button>
+        preview.style.cssText = `
+            position: relative;
+            margin-top: 1rem;
+            z-index: 10;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
     `   ;
     
-        inputElement.parentElement.appendChild(preview);
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = `
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            display: block;
+    `   ;
     
-        // 削除ボタン
-        preview.querySelector('.remove-preview').addEventListener('click', function() {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-preview';
+        removeBtn.textContent = '✕';
+        removeBtn.style.cssText = `
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 11;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    `   ;
+    
+        preview.appendChild(img);
+        preview.appendChild(removeBtn);
+    
+        // 親要素に追加（より安全な方法）
+        const container = inputElement.closest('.form-group') || inputElement.parentElement;
+        container.appendChild(preview);
+    
+        // 削除ボタンのイベント（確実にバインド）
+        removeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             inputElement.value = '';
             preview.remove();
         });
+    
+        // プレビューをスクロールして表示
+        setTimeout(() => {
+            preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
     }
 
     // モーダル機能
@@ -746,29 +825,6 @@ function performSearch(query) {
     }
 }
 
-// 画像プレビュー機能
-function showImagePreview(src, inputElement) {
-    // 既存のプレビューを削除
-    const existingPreview = document.querySelector('.image-preview');
-    if (existingPreview) existingPreview.remove();
-    
-    // 新しいプレビューを作成
-    const preview = document.createElement('div');
-    preview.className = 'image-preview';
-    preview.style.cssText = 'position: relative; margin-top: 1rem;';
-    preview.innerHTML = `
-        <img src="${src}" style="max-width: 300px; max-height: 200px; border-radius: 8px;">
-        <button type="button" class="remove-preview" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">✕</button>
-    `;
-    
-    inputElement.parentElement.appendChild(preview);
-    
-    // 削除ボタン
-    preview.querySelector('.remove-preview').addEventListener('click', function() {
-        inputElement.value = '';
-        preview.remove();
-    });
-}
 
     // 最小限のフォーム処理
     function initializeMinimalForms() {
