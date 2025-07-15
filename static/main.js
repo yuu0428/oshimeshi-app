@@ -26,9 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. モバイルメニュー初期化
     initializeMobileMenu();
     
-    // 4. 画像プレビュー初期化
-    initializeImagePreview();
-    
     // 5. フォーム関連の処理は最小限に
     initializeMinimalForms();
     
@@ -37,6 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 7. スクロール効果
     initializeScrollEffects();
+
+    // 8. 画像プレビュー初期化
+    initializeImagePreview();
 
     // === 関数定義 ===
     
@@ -125,7 +125,62 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+
+    // 画像プレビュー機能
+    function initializeImagePreview() {
+        const imageInput = document.querySelector('input[type="file"]');
+        if (!imageInput) return;
     
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+        
+            // ファイル形式チェック
+            if (!file.type.match(/^image\/(jpeg|jpg|png)$/i)) {
+                alert('JPEG、PNG形式の画像のみ対応しています。');
+                this.value = '';
+                return;
+            }
+        
+            // ファイルサイズチェック（10MB）
+            if (file.size > 10 * 1024 * 1024) {
+                alert('ファイルサイズは10MB以下にしてください。');
+                this.value = '';
+                return;
+            }
+        
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showImagePreview(e.target.result, imageInput);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 画像プレビュー表示
+    function showImagePreview(src, inputElement) {
+        // 既存のプレビューを削除
+        const existingPreview = document.querySelector('.image-preview');
+        if (existingPreview) existingPreview.remove();
+    
+        // 新しいプレビューを作成
+        const preview = document.createElement('div');
+        preview.className = 'image-preview';
+        preview.style.cssText = 'position: relative; margin-top: 1rem;';
+        preview.innerHTML = `
+            <img src="${src}" style="max-width: 300px; max-height: 200px; border-radius: 8px;">
+            <button type="button" class="remove-preview" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">✕</button>
+    `   ;
+    
+        inputElement.parentElement.appendChild(preview);
+    
+        // 削除ボタン
+        preview.querySelector('.remove-preview').addEventListener('click', function() {
+            inputElement.value = '';
+            preview.remove();
+        });
+    }
+
     // モーダル機能
     function initializeModals() {
         // 管理者モーダル
@@ -174,7 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 投稿詳細モーダル
         initializePostDetailModal();
+
+        //  公式情報モーダルの初期化を追加
+        initializeOfficialInfoModal();
     }
+
+
 
     // 投稿詳細モーダルの初期化
     function initializePostDetailModal() {
@@ -204,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
                 postModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
             });
         }
 
@@ -211,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
         postModal.addEventListener('click', function(e) {
             if (e.target === postModal) {
                 postModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
             }
         });
     }
@@ -283,9 +345,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // モーダルを表示
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
+
+
+        // モーダル閉じる処理を追加
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // ESCキーで閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
     }
 
-// 🆕 公式情報モーダル初期化
+// 公式情報モーダル初期化
 function initializeOfficialInfoModal() {
     // デスクトップ版
     const officialBtn = document.getElementById('officialInfoBtn');
@@ -346,7 +425,7 @@ function initializeOfficialInfoModal() {
     }
 }
 
-// 🆕 公式情報モーダルを開く
+// 公式情報モーダルを開く
 function openOfficialModal(modal) {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -364,7 +443,7 @@ function openOfficialModal(modal) {
     }
 }
 
-// 🆕 公式情報モーダルを閉じる
+// 公式情報モーダルを閉じる
 function closeOfficialModal(modal) {
     modal.style.opacity = '0';
     
@@ -373,7 +452,7 @@ function closeOfficialModal(modal) {
         document.body.style.overflow = 'auto';
         
         // フォーカスを公式情報ボタンに戻す
-        const officialBtn = document.getElementById('officialInfoBtn');
+        const officialBtn = document.getElementById('officialInfoBtn') || document.getElementById('officialInfoBtnMobile');
         if (officialBtn) {
             officialBtn.focus();
         }
