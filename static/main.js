@@ -151,7 +151,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
             const reader = new FileReader();
             reader.onload = function(e) {
-                showImagePreview(e.target.result, imageInput);
+                try {
+                    showImagePreview(e.target.result, imageInput);
+                } catch (error) {
+                    console.error('プレビュー表示エラー:', error);
+                    alert('プレビューの表示に失敗しました。');
+                }
             };
             reader.readAsDataURL(file);
         });
@@ -241,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const postCards = document.querySelectorAll('.post-card');
         const postModal = document.getElementById('postDetailModal');
         const closeBtn = document.getElementById('closePostModal');
-        
+    
         if (!postModal) return;
 
         // 投稿カードクリックイベント
@@ -251,16 +256,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (e.target.closest('.like-button, .delete-button')) {
                     return;
                 }
-                
+            
                 e.preventDefault();
                 showPostDetail(this);
             });
-            
+        
             // カードにカーソルスタイルを適用
             card.style.cursor = 'pointer';
         });
 
-        // モーダル閉じるボタン
+        // モーダル閉じるボタン（一度だけ設定）
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
                 postModal.style.display = 'none';
@@ -268,9 +273,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // モーダル外クリックで閉じる
+        // モーダル外クリックで閉じる（一度だけ設定）
         postModal.addEventListener('click', function(e) {
             if (e.target === postModal) {
+                postModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // ESCキーで閉じる（一度だけ設定）
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && postModal.style.display === 'block') {
                 postModal.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
@@ -345,23 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // モーダルを表示
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-
-
-        // モーダル閉じる処理を追加
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-
-        // ESCキーで閉じる
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'block') {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
     }
 
 // 公式情報モーダル初期化
