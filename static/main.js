@@ -439,137 +439,163 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
     }
 
-// 公式情報モーダル初期化
-function initializeOfficialInfoModal() {
-    // デスクトップ版
-    const officialBtn = document.getElementById('officialInfoBtn');
-    // モバイル版
-    const officialBtnMobile = document.getElementById('officialInfoBtnMobile');
-    const officialModal = document.getElementById('officialInfoModal');
-    const closeBtn = document.getElementById('closeOfficialModal');
+    // 公式情報モーダル初期化
+    function initializeOfficialInfoModal() {
+        // デスクトップ版
+        const officialBtn = document.getElementById('officialInfoBtn');
+        // モバイル版
+        const officialBtnMobile = document.getElementById('officialInfoBtnMobile');
+        const officialModal = document.getElementById('officialInfoModal');
+        const closeBtn = document.getElementById('closeOfficialModal');
     
-    if (!officialModal) return;
+        if (!officialModal) return;
 
-    // デスクトップ版ボタン
-    if (officialBtn) {
-        officialBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openOfficialModal(officialModal);
-        });
-    }
-
-    // モバイル版ボタン
-    if (officialBtnMobile) {
-        officialBtnMobile.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openOfficialModal(officialModal);
-        });
-    }
-
-    // 閉じるボタンクリック
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            closeOfficialModal(officialModal);
-        });
-    }
-
-    // モーダル外クリックで閉じる
-    officialModal.addEventListener('click', function(e) {
-        if (e.target === officialModal) {
-            closeOfficialModal(officialModal);
-        }
-    });
-
-    // Instagramボタンの処理
-    const instagramBtn = officialModal.querySelector('.instagram-btn');
-    if (instagramBtn) {
-        instagramBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const instagramURL = 'https://instagram.com/oshimeshi_yamanashi';
-            
-            if (this.getAttribute('href') === '#' || !this.getAttribute('href')) {
-                alert('Instagramアカウントは近日公開予定です！\nしばらくお待ちください。');
-                return;
-            }
-            
-            window.open(instagramURL, '_blank', 'noopener,noreferrer');
-        });
-    }
-}
-
-// 公式情報モーダルを開く
-function openOfficialModal(modal) {
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // フェードイン効果
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
-    
-    // フォーカス管理
-    const closeBtn = modal.querySelector('.official-info-close');
-    if (closeBtn) {
-        closeBtn.focus();
-    }
-}
-
-// 公式情報モーダルを閉じる
-function closeOfficialModal(modal) {
-    modal.style.opacity = '0';
-    
-    setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        // フォーカスを公式情報ボタンに戻す
-        const officialBtn = document.getElementById('officialInfoBtn') || document.getElementById('officialInfoBtnMobile');
+        // デスクトップ版ボタン
         if (officialBtn) {
-            officialBtn.focus();
+            officialBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openOfficialModal(officialModal);
+            });
         }
-    }, 300);
-}
 
+        // モバイル版ボタン
+        if (officialBtnMobile) {
+            officialBtnMobile.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openOfficialModal(officialModal);
+            });
+        }
 
+        // 閉じるボタンクリック
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeOfficialModal(officialModal);
+            });
+        }
 
-function openModal(modal) {
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+        // モーダル外クリックで閉じる
+        officialModal.addEventListener('click', function(e) {
+            if (e.target === officialModal) {
+                closeOfficialModal(officialModal);
+            }
+        });
+
+        // Instagramボタンの処理
+        const instagramBtn = officialModal.querySelector('.instagram-btn');
+        if (instagramBtn) {
+            instagramBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const instagramURL = 'https://instagram.com/oshimeshi_yamanashi';
+            
+                if (this.getAttribute('href') === '#' || !this.getAttribute('href')) {
+                    alert('Instagramアカウントは近日公開予定です！\nしばらくお待ちください。');
+                    return;
+                }
+            
+                window.open(instagramURL, '_blank', 'noopener,noreferrer');
+            });
+        }
+    }
+
+    // 公式情報モーダルを開く
+    function openOfficialModal(modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
     
-    // フェードインアニメーション
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
-}
-
-function closeModalFunc(modal) {
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }, 300);
-}
-
-// フォームバリデーションの修正版
-function initializeFormsValidation() {
-    const forms = document.querySelectorAll('form');
+        // フェードイン効果
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+        }, 10);
     
-    forms.forEach(form => {
-        // iOS Safariでは簡略化されたバリデーション
-        if (isiOSSafari()) {
+        // フォーカス管理
+        const closeBtn = modal.querySelector('.official-info-close');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
+    }
+
+    // 公式情報モーダルを閉じる
+    function closeOfficialModal(modal) {
+        modal.style.opacity = '0';
+    
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        
+            // フォーカスを公式情報ボタンに戻す
+            const officialBtn = document.getElementById('officialInfoBtn') || document.getElementById('officialInfoBtnMobile');
+            if (officialBtn) {
+                officialBtn.focus();
+            }
+        }, 300);
+    }
+
+
+
+    function openModal(modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    
+        // フェードインアニメーション
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+        }, 10);
+    }
+
+    function closeModalFunc(modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+
+    // フォームバリデーションの修正版
+    function initializeFormsValidation() {
+        const forms = document.querySelectorAll('form');
+    
+        forms.forEach(form => {
+            // iOS Safariでは簡略化されたバリデーション
+            if (isiOSSafari()) {
+                form.addEventListener('submit', function(e) {
+                    const csrfToken = getCSRFToken();
+                    if (!csrfToken) {
+                        e.preventDefault();
+                        alert('セキュリティトークンが見つかりません。ページを更新してください。');
+                        return false;
+                    }
+                
+                    let csrfInput = form.querySelector('input[name="csrf_token"]');
+                    if (!csrfInput) {
+                        csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = csrfToken;
+                        form.appendChild(csrfInput);
+                    }
+                });
+                return; // iOS Safariではリアルタイムバリデーションをスキップ
+            }
+        
+            // デスクトップ版の既存コード
             form.addEventListener('submit', function(e) {
+                if (!validateForm(this)) {
+                    e.preventDefault();
+                    return false;
+                }
+            
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) {
                     e.preventDefault();
                     alert('セキュリティトークンが見つかりません。ページを更新してください。');
                     return false;
                 }
-                
+            
                 let csrfInput = form.querySelector('input[name="csrf_token"]');
                 if (!csrfInput) {
                     csrfInput = document.createElement('input');
@@ -579,137 +605,111 @@ function initializeFormsValidation() {
                     form.appendChild(csrfInput);
                 }
             });
-            return; // iOS Safariではリアルタイムバリデーションをスキップ
-        }
-        
-        // デスクトップ版の既存コード
-        form.addEventListener('submit', function(e) {
-            if (!validateForm(this)) {
-                e.preventDefault();
-                return false;
-            }
-            
-            const csrfToken = getCSRFToken();
-            if (!csrfToken) {
-                e.preventDefault();
-                alert('セキュリティトークンが見つかりません。ページを更新してください。');
-                return false;
-            }
-            
-            let csrfInput = form.querySelector('input[name="csrf_token"]');
-            if (!csrfInput) {
-                csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrf_token';
-                csrfInput.value = csrfToken;
-                form.appendChild(csrfInput);
-            }
-        });
 
-        const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
+            const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
             
-            input.addEventListener('input', function() {
-                clearFieldError(this);
+                input.addEventListener('input', function() {
+                    clearFieldError(this);
+                });
             });
         });
-    });
-}
+    }
 
 
-function validateForm(form) {
-    let isValid = true;
-    const requiredFields = form.querySelectorAll('input[required], textarea[required], select[required]');
+    function validateForm(form) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], textarea[required], select[required]');
     
-    requiredFields.forEach(field => {
-        if (!validateField(field)) {
+        requiredFields.forEach(field => {
+            if (!validateField(field)) {
+                isValid = false;
+            }
+        });
+    
+        return isValid;
+    }
+
+    function validateField(field) {
+        const value = field.value.trim();
+        const fieldName = field.name;
+        let isValid = true;
+        let errorMessage = '';
+
+        // 必須チェック
+        if (field.hasAttribute('required') && !value) {
             isValid = false;
+            errorMessage = 'この項目は必須です';
         }
-    });
-    
-    return isValid;
-}
 
-function validateField(field) {
-    const value = field.value.trim();
-    const fieldName = field.name;
-    let isValid = true;
-    let errorMessage = '';
+        // 特定フィールドの詳細バリデーション
+        if (value) {
+            switch (fieldName) {
+                case 'store_name':
+                    if (value.length > 50) {
+                        isValid = false;
+                        errorMessage = '店名は50文字以内で入力してください';
+                    }
+                    break;
+                case 'caption':
+                    if (value.length > 500) {
+                        isValid = false;
+                        errorMessage = 'キャプションは500文字以内で入力してください';
+                    }
+                    break;
+                case 'new_username':
+                    if (value.length > 50) {
+                        isValid = false;
+                        errorMessage = 'ユーザー名は50文字以内で入力してください';
+                    } else if (!/^[a-zA-Z0-9あ-んア-ヶー一-龯\s]+$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'ユーザー名に使用できない文字が含まれています';
+                    }
+                    break;
+            }
+        }
 
-    // 必須チェック
-    if (field.hasAttribute('required') && !value) {
-        isValid = false;
-        errorMessage = 'この項目は必須です';
+        // エラー表示
+        if (!isValid) {
+            showFieldError(field, errorMessage);
+        } else {
+            clearFieldError(field);
+        }
+
+        return isValid;
     }
 
-    // 特定フィールドの詳細バリデーション
-    if (value) {
-        switch (fieldName) {
-            case 'store_name':
-                if (value.length > 50) {
-                    isValid = false;
-                    errorMessage = '店名は50文字以内で入力してください';
-                }
-                break;
-            case 'caption':
-                if (value.length > 500) {
-                    isValid = false;
-                    errorMessage = 'キャプションは500文字以内で入力してください';
-                }
-                break;
-            case 'new_username':
-                if (value.length > 50) {
-                    isValid = false;
-                    errorMessage = 'ユーザー名は50文字以内で入力してください';
-                } else if (!/^[a-zA-Z0-9あ-んア-ヶー一-龯\s]+$/.test(value)) {
-                    isValid = false;
-                    errorMessage = 'ユーザー名に使用できない文字が含まれています';
-                }
-                break;
-        }
-    }
-
-    // エラー表示
-    if (!isValid) {
-        showFieldError(field, errorMessage);
-    } else {
+    function showFieldError(field, message) {
         clearFieldError(field);
+    
+        field.style.borderColor = '#ff6b6b';
+        field.style.backgroundColor = 'rgba(255, 107, 107, 0.05)';
+    
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'field-error';
+        errorDiv.textContent = message;
+        errorDiv.style.cssText = `
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: block;
+    `   ;
+    
+        field.parentNode.insertBefore(errorDiv, field.nextSibling);
     }
 
-    return isValid;
-}
-
-function showFieldError(field, message) {
-    clearFieldError(field);
+    function clearFieldError(field) {
+        field.style.borderColor = '';
+        field.style.backgroundColor = '';
     
-    field.style.borderColor = '#ff6b6b';
-    field.style.backgroundColor = 'rgba(255, 107, 107, 0.05)';
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'field-error';
-    errorDiv.textContent = message;
-    errorDiv.style.cssText = `
-        color: #ff6b6b;
-        font-size: 0.8rem;
-        margin-top: 0.25rem;
-        display: block;
-    `;
-    
-    field.parentNode.insertBefore(errorDiv, field.nextSibling);
-}
-
-function clearFieldError(field) {
-    field.style.borderColor = '';
-    field.style.backgroundColor = '';
-    
-    const errorDiv = field.parentNode.querySelector('.field-error');
-    if (errorDiv) {
-        errorDiv.remove();
+        const errorDiv = field.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
     }
-}
 
     // モバイルメニュー
     function initializeMobileMenu() {
@@ -740,90 +740,90 @@ function clearFieldError(field) {
         });
     }
 
-// iOS Safariの検出
-function isiOSSafari() {
-    const ua = window.navigator.userAgent;
-    const iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-    const webkit = !!ua.match(/WebKit/i);
-    const iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
-    return iOSSafari;
-}
-
-// 検索・フィルタ機能
-function initializeSearchFilters() {
-    // iOS Safariの場合は特別な処理を行わない
-    if (isiOSSafari()) {
-        //console.log('iOS Safari detected: Using native form controls');
-        
-        // すべてのselect要素からonchange属性を削除
-        document.querySelectorAll('select[onchange]').forEach(select => {
-            select.removeAttribute('onchange');
-        });
-        
-        // タッチイベントの最適化
-        document.querySelectorAll('input, select, textarea').forEach(element => {
-            // 既存のイベントリスナーをすべて削除
-            const newElement = element.cloneNode(true);
-            element.parentNode.replaceChild(newElement, element);
-            
-            // iOSに最適化されたイベントリスナーを追加
-            newElement.addEventListener('touchstart', function(e) {
-                // デフォルトの動作を維持
-                e.stopPropagation();
-            }, { passive: true });
-        });
-        
-        return; // iOS Safariでは以降の処理をスキップ
+    // iOS Safariの検出
+    function isiOSSafari() {
+        const ua = window.navigator.userAgent;
+        const iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+        const webkit = !!ua.match(/WebKit/i);
+        const iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+        return iOSSafari;
     }
-    
-    // デスクトップのみの処理
-    const searchForm = document.querySelector('.search-form form');
-    const filterSelects = document.querySelectorAll('select[onchange]');
-    
-    if (searchForm) {
-        const searchInput = searchForm.querySelector('input[type="text"]');
-        if (searchInput) {
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    performSearch(this.value);
-                }, 500);
+
+    // 検索・フィルタ機能
+    function initializeSearchFilters() {
+        // iOS Safariの場合は特別な処理を行わない
+        if (isiOSSafari()) {
+            //console.log('iOS Safari detected: Using native form controls');
+        
+            // すべてのselect要素からonchange属性を削除
+            document.querySelectorAll('select[onchange]').forEach(select => {
+                select.removeAttribute('onchange');
             });
+        
+            // タッチイベントの最適化
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                // 既存のイベントリスナーをすべて削除
+                const newElement = element.cloneNode(true);
+                element.parentNode.replaceChild(newElement, element);
+            
+                // iOSに最適化されたイベントリスナーを追加
+                newElement.addEventListener('touchstart', function(e) {
+                    // デフォルトの動作を維持
+                    e.stopPropagation();
+                }, { passive: true });
+            });
+        
+            return; // iOS Safariでは以降の処理をスキップ
+        }
+    
+        // デスクトップのみの処理
+        const searchForm = document.querySelector('.search-form form');
+        const filterSelects = document.querySelectorAll('select[onchange]');
+    
+        if (searchForm) {
+            const searchInput = searchForm.querySelector('input[type="text"]');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performSearch(this.value);
+                    }, 500);
+                });
+            }
+        }
+
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                const container = document.querySelector('.posts-container, .ranking-container');
+                if (container) {
+                    container.style.opacity = '0.5';
+                    container.style.transform = 'scale(0.98)';
+                
+                    setTimeout(() => {
+                        this.form.submit();
+                    }, 150);
+                } else {
+                    this.form.submit();
+                }
+            });
+        });
+    }
+
+
+    function performSearch(query) {
+        // 実際の検索処理はサーバーサイドで行うため、
+        // ここではUI的なフィードバックのみ実装
+        const searchResults = document.querySelector('.posts-container, .search-results');
+        if (searchResults && query.length > 2) {
+            searchResults.style.opacity = '0.7';
+        
+            // 模擬的な検索処理
+            setTimeout(() => {
+                searchResults.style.opacity = '1';
+            }, 300);
         }
     }
-
-    filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            const container = document.querySelector('.posts-container, .ranking-container');
-            if (container) {
-                container.style.opacity = '0.5';
-                container.style.transform = 'scale(0.98)';
-                
-                setTimeout(() => {
-                    this.form.submit();
-                }, 150);
-            } else {
-                this.form.submit();
-            }
-        });
-    });
-}
-
-
-function performSearch(query) {
-    // 実際の検索処理はサーバーサイドで行うため、
-    // ここではUI的なフィードバックのみ実装
-    const searchResults = document.querySelector('.posts-container, .search-results');
-    if (searchResults && query.length > 2) {
-        searchResults.style.opacity = '0.7';
-        
-        // 模擬的な検索処理
-        setTimeout(() => {
-            searchResults.style.opacity = '1';
-        }, 300);
-    }
-}
 
 
     // 最小限のフォーム処理
@@ -858,10 +858,10 @@ function performSearch(query) {
         }
     }
 
-// エラーハンドリング
-window.addEventListener('error', function(e) {
-    console.error('JavaScript Error:', e.error);
-});
+    // エラーハンドリング
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript Error:', e.error);
+    });
 
     // スクロール効果
     function initializeScrollEffects() {
@@ -898,78 +898,77 @@ window.addEventListener('error', function(e) {
         window.addEventListener('scroll', requestTick);
     }
 
-    //console.log('アプリケーション初期化完了');
-});
 
-// ユーティリティ関数
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
+    // ユーティリティ関数
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
-            func(...args);
+            timeout = setTimeout(later, wait);
         };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+    }
 
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
 
 
-// パフォーマンス最適化
-if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-        // 非重要な初期化処理
-        //console.log('推しメシアプリが正常に初期化されました');
-    });
-}
+    // パフォーマンス最適化
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+            // 非重要な初期化処理
+            //console.log('推しメシアプリが正常に初期化されました');
+        });
+    }
 
-// Service Worker登録（PWA対応準備）
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // 将来的なPWA化に備えた準備
-        //console.log('Service Worker準備完了');
-    });
-}
+    // Service Worker登録（PWA対応準備）
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // 将来的なPWA化に備えた準備
+            //console.log('Service Worker準備完了');
+        });
+    }
 
-// iOS Safari用の追加最適化
-if (isiOSSafari()) {
-    document.addEventListener('DOMContentLoaded', function() {
-        // フォーム要素のタッチ最適化
-        const formElements = document.querySelectorAll('input, select, textarea, button');
+    // iOS Safari用の追加最適化
+    if (isiOSSafari()) {
+        document.addEventListener('DOMContentLoaded', function() {
+            // フォーム要素のタッチ最適化
+            const formElements = document.querySelectorAll('input, select, textarea, button');
         
-        formElements.forEach(element => {
-            // タッチイベントの最適化
-            element.style.webkitTouchCallout = 'default';
-            element.style.webkitUserSelect = 'text';
+            formElements.forEach(element => {
+                // タッチイベントの最適化
+                element.style.webkitTouchCallout = 'default';
+                element.style.webkitUserSelect = 'text';
             
-            // z-indexの確認
-            const computedStyle = window.getComputedStyle(element);
-            if (computedStyle.position === 'static') {
-                element.style.position = 'relative';
+                // z-indexの確認
+                const computedStyle = window.getComputedStyle(element);
+                if (computedStyle.position === 'static') {
+                    element.style.position = 'relative';
+                }
+            });
+        
+            // ナビゲーションがフォーム要素を隠していないか確認
+            const nav = document.querySelector('nav');
+            if (nav) {
+                nav.style.pointerEvents = 'auto';
+                // ナビゲーション内の要素以外はpointer-eventsを継承しない
+                document.querySelectorAll('nav *').forEach(el => {
+                    el.style.pointerEvents = 'auto';
+                });
             }
         });
-        
-        // ナビゲーションがフォーム要素を隠していないか確認
-        const nav = document.querySelector('nav');
-        if (nav) {
-            nav.style.pointerEvents = 'auto';
-            // ナビゲーション内の要素以外はpointer-eventsを継承しない
-            document.querySelectorAll('nav *').forEach(el => {
-                el.style.pointerEvents = 'auto';
-            });
-        }
-    });
-}
+    }
+});
