@@ -329,18 +329,31 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!postModal) return;
 
         // 投稿カードクリックイベント
-        postCards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // いいねボタンや削除ボタンがクリックされた場合は除外
-                if (e.target.closest('.like-button, .delete-button')) {
-                    return;
-                }
-            
-                e.preventDefault();
-                showPostDetail(this);
-            });
+        // イベント委譲を使用して動的な要素にも対応
+        const container = document.querySelector('.posts-container') || document.body;
+    
+        // 既存のイベントリスナーを削除（重複防止）
+        if (window.postCardClickHandler) {
+            container.removeEventListener('click', window.postCardClickHandler);
+        }
+    
+        window.postCardClickHandler = function(e) {
+            const card = e.target.closest('.post-card');
+            if (!card) return;
         
-            // カードにカーソルスタイルを適用
+            // いいねボタンや削除ボタンがクリックされた場合は除外
+            if (e.target.closest('.like-button, .delete-button, .delete-form, form')) {
+                return;
+            }
+        
+            e.preventDefault();
+            showPostDetail(card);
+        };
+    
+        container.addEventListener('click', window.postCardClickHandler);
+    
+        // 既存のカードにカーソルスタイルを適用
+        postCards.forEach(card => {
             card.style.cursor = 'pointer';
         });
 
@@ -372,21 +385,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // 投稿詳細をモーダルで表示
     function showPostDetail(cardElement) {
         const modal = document.getElementById('postDetailModal');
-        if (!modal) return;
-
+        if (!modal) {
+            console.error('投稿詳細モーダルが見つかりません');
+            return;
+        }
+    
         // カードからデータを取得
         const image = cardElement.querySelector('.post-image');
-        const storeName = cardElement.querySelector('h3').textContent;
+        const storeName = cardElement.querySelector('h3')?.textContent || '';
         const postMeta = cardElement.querySelector('.post-meta');
-        const caption = cardElement.querySelector('.post-caption').textContent;
+        const caption = cardElement.querySelector('.post-caption')?.textContent || '';
         const likeButton = cardElement.querySelector('.like-button');
         
-        // 地域、価格帯、投稿者、高校情報を抽出
-        const metaText = postMeta.textContent;
-        const areaMatch = metaText.match(/地域:\s*([^|]+)/);
-        const priceMatch = metaText.match(/価格帯:\s*([^|]+)/);
-        const userMatch = metaText.match(/投稿者:\s*([^|]+)/);
-        const schoolMatch = metaText.match(/高校:\s*(.+)/);
+        // 地域、価格帯、投稿者、高校情報を抽出（innerHTMLを使って強調タグを除去）
+        const metaHTML = postMeta ? postMeta.innerHTML : '';
+        const metaText = postMeta ? postMeta.textContent : '';
+        
+        // より柔軟な正規表現でマッチング
+        const areaMatch = metaText.match(/地域[：:]\s*([^|]+)/);
+        const priceMatch = metaText.match(/価格帯[：:]\s*([^|]+)/);
+        const userMatch = metaText.match(/投稿者[：:]\s*([^|]+)/);
+        const schoolMatch = metaText.match(/高校[：:]\s*([^|]+)/);
         
         const area = areaMatch ? areaMatch[1].trim() : '';
         const priceRange = priceMatch ? priceMatch[1].trim() : '';
@@ -435,8 +454,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // モーダルを表示
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        try {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // フォーカス管理
+            const closeBtn = modal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.focus();
+            }
+        } catch (error) {
+            console.error('投稿詳細モーダルの表示に失敗しました:', error);
+        }
+    }
+
+    // タッチデバイス対応
+    if ('ontouchstart' in window) {
+        container.addEventListener('touchend', function(e) {
+            // タッチイベントでも同じ処理
+            const card = e.target.closest('.post-card');
+            if (!card) return;
+        
+            if (e.target.closest('.like-button, .delete-button, .delete-form, form')) {
+                return;
+            }
+        
+            e.preventDefault();
+        
+            // ダブルタップ防止
+            if (card.dataset.lastTap && Date.now() - card.dataset.lastTap < 500) {
+                return;
+            }
+            card.dataset.lastTap = Date.now();
+        
+            showPostDetail(card);
+        });
     }
 
     // 公式情報モーダル初期化

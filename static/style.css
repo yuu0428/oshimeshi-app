@@ -1556,6 +1556,26 @@ select:disabled {
     transform: translateY(0);
 }
 
+/* モーダル表示の優先順位を確実にする */
+#postDetailModal {
+    z-index: 9999 !important;
+}
+
+#postDetailModal .modal-content {
+    z-index: 10000 !important;
+}
+
+/* モーダル表示時のアニメーション追加 */
+#postDetailModal {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#postDetailModal[style*="display: block"] {
+    opacity: 1;
+}
+
+
 /* 閉じるボタン */
 .close {
     position: absolute;
