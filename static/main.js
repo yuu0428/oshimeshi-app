@@ -882,6 +882,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // 画像プレビュー機能
+    function showImagePreview(src, inputElement) {
+        // 既存のプレビューを削除
+        const existingPreview = document.querySelector('.image-preview');
+        if (existingPreview) existingPreview.remove();
+    
+        // 新しいプレビューを作成
+        const preview = document.createElement('div');
+        preview.className = 'image-preview';
+        preview.style.cssText = 'position: relative; margin-top: 1rem;';
+        preview.innerHTML = `
+            <img src="${src}" style="max-width: 300px; max-height: 200px; border-radius: 8px;">
+            <button type="button" class="remove-preview" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">✕</button>
+        `;
+    
+        inputElement.parentElement.appendChild(preview);
+    
+        // 削除ボタン
+        preview.querySelector('.remove-preview').addEventListener('click', function() {
+            inputElement.value = '';
+            preview.remove();
+        });
+    }
+
 
     // 最小限のフォーム処理
     function initializeMinimalForms() {
