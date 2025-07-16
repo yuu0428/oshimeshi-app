@@ -732,11 +732,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // メニュー外クリックで閉じる
         document.addEventListener('click', function(e) {
-            if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                mobileMenu.classList.remove('show');
-                const icon = mobileMenuBtn.querySelector('.hamburger-icon');
-                if (icon) icon.textContent = '☰';
-            }
+            // クリックイベントを少し遅延させる
+            setTimeout(() => {
+                if (mobileMenu.classList.contains('show') && 
+                    !mobileMenu.contains(e.target) && 
+                    !mobileMenuBtn.contains(e.target)) {
+                    mobileMenu.classList.remove('show');
+                    const icon = mobileMenuBtn.querySelector('.hamburger-icon');
+                    if (icon) icon.textContent = '☰';
+                }
+            }, 10);
         });
     }
 

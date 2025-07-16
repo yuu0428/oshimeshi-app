@@ -43,7 +43,7 @@ nav {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 100; /* z-indexを下げる */
+    z-index: 900;
     height: 70px;
 }
 
@@ -180,7 +180,7 @@ nav {
     padding: 1rem;
     flex-direction: column;
     gap: 0.5rem;
-    z-index: 1000;
+    z-index: 901;
     border-radius: 0 0 12px 12px;
 }
 
@@ -2219,24 +2219,22 @@ textarea {
 
 /* iOS専用の修正 */
 @supports (-webkit-touch-callout: none) {
-    /* iOS Safari でのみ適用 */
+    /* フォーム要素の統一スタイル */
     input[type="text"],
     input[type="password"],
     input[type="file"],
     select,
     textarea {
-        /* タップ領域を確実に確保 */
-        min-height: 44px; /* Apple推奨の最小タップ領域 */
-        -webkit-user-select: text; /* テキスト選択を有効化 */
+        -webkit-appearance: none;
+        font-size: 16px !important;
+        min-height: 44px !important;
+        padding: 12px !important;
+        touch-action: manipulation;
     }
     
-    /* selectタグの特別対応 */
+    /* selectのみネイティブ表示 */
     select {
-        /* iOSのネイティブ表示を使用 */
         -webkit-appearance: menulist !important;
-        -moz-appearance: menulist !important;
-        appearance: menulist !important;
-        background-image: none !important; /* カスタム矢印を削除 */
     }
 }
 
@@ -2254,7 +2252,12 @@ nav {
 /* モーダルは高いz-indexを維持 */
 .modal,
 .official-info-modal {
-    z-index: 1000; /* そのまま */
+    z-index: 1000; /*最上位を維持*/
+}
+
+.modal-content,
+.official-info-content {
+    z-index: 1001;  /* モーダル背景より上 */
 }
 
 /* フォーム要素のラベル調整 */
