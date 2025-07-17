@@ -41,7 +41,13 @@ if not SUPABASE_URL or not SUPABASE_ANON_KEY:
     raise ValueError("SUPABASE_URLとSUPABASE_ANON_KEYが.envファイルに設定されていません。")
 
 # Supabaseクライアント初期化
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+supabase = None
+
+def get_supabase_client():
+    global supabase
+    if supabase is None:
+        supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+    return supabase
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -140,12 +146,14 @@ if not app.debug:
 def upload_image_to_supabase(file, filename):
     """Supabase Storageに画像をアップロード"""
     try:
+        client = get_supabase_client()
+
         # ファイルの内容を読み取り
         file.seek(0)
         file_content = file.read()
         
         # Supabase Storageにアップロード
-        result = supabase.storage.from_("uploads").upload(
+        result = client.storage.from_("uploads").upload(
             path=filename,
             file=file_content,
             file_options={"content-type": file.content_type}
@@ -165,6 +173,8 @@ def upload_image_to_supabase(file, filename):
 def delete_image_from_supabase(image_path):
     """Supabase Storageから画像を削除"""
     try:
+        client = get_supabase_client()
+
         # URLからファイル名を抽出
         if "/uploads/" in image_path:
             filename = image_path.split("/uploads/")[-1]
@@ -172,7 +182,7 @@ def delete_image_from_supabase(image_path):
             filename = image_path.split("/")[-1]
         
         # Supabase Storageから削除
-        result = supabase.storage.from_("uploads").remove([filename])
+        result = client.storage.from_("uploads").remove([filename])
         
         if result.status_code != 200:
             print(f"Supabase delete warning: {result.status_code}")
