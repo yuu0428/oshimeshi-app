@@ -57,4 +57,10 @@
                 </div>
             {% endfor %}
         </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📢</div>
+            <p>現在、広告掲載中の投稿はありません。</p>
+        </div>
+    {% endif %}
 {% endblock %}
