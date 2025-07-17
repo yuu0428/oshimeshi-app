@@ -17,18 +17,21 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     padding-top: 70px; /* 固定ヘッダー分のスペース */
+    overflow-x: hidden;
 }
 
 /* モバイルでの body パディング調整 */
 @media (max-width: 768px) {
     body {
         padding-top: 80px !important; /* モバイルでは少し多めに */
+        overflow-x: hidden;
     }
 }
 
 @media (max-width: 480px) {
     body {
         padding-top: 90px !important; /* 小さな画面ではさらに多めに */
+        overflow-x: hidden;
     }
 }
 
