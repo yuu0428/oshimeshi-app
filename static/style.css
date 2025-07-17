@@ -542,207 +542,6 @@ nav {
     }
 }
 
-/* アドミンボタンコンテナ */
-.admin-login-container {
-    position: relative;
-    z-index: 50;
-    text-align: right;
-    margin-bottom: 1.5rem;
-    padding: 0.5rem 0;
-}
-
-/* アドミンボタン */
-.admin-login-btn {
-    background-color: #6c757d;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 51;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.admin-login-btn:hover {
-    background-color: #5a6268;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.admin-login-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* アドミンモーダル */
-.admin-modal {
-    display: none;
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(2px);
-}
-
-.admin-modal-content {
-    background-color: white;
-    margin: 10% auto;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    position: relative;
-    z-index: 2001;
-    overflow: hidden;
-}
-
-.admin-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-bottom: 1px solid #dee2e6;
-}
-
-.admin-modal-header h3 {
-    margin: 0;
-    color: #495057;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.admin-modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #6c757d;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.admin-modal-close:hover {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    transform: scale(1.1);
-}
-
-.admin-modal-body {
-    padding: 2rem;
-}
-
-.admin-modal-body p {
-    margin-bottom: 1.5rem;
-    color: #6c757d;
-    font-size: 0.95rem;
-}
-
-.admin-modal-body .form-group {
-    margin-bottom: 1.5rem;
-}
-
-.admin-password-input {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    box-sizing: border-box;
-}
-
-.admin-password-input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.admin-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-}
-
-.btn-cancel {
-    background-color: #6c757d;
-    color: white;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-    background-color: #5a6268;
-}
-
-.btn-submit {
-    background-color: #28a745;
-    color: white;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.btn-submit:hover {
-    background-color: #218838;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-    .admin-modal-content {
-        width: 95%;
-        margin: 5% auto;
-    }
-    
-    .admin-modal-header {
-        padding: 1rem 1.5rem;
-    }
-    
-    .admin-modal-body {
-        padding: 1.5rem;
-    }
-    
-    .admin-modal-actions {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    
-    .btn-cancel,
-    .btn-submit {
-        width: 100%;
-        padding: 0.8rem;
-    }
-}
-
-/* フォーカス管理 */
-.admin-login-btn:focus,
-.admin-modal-close:focus,
-.admin-password-input:focus,
-.btn-cancel:focus,
-.btn-submit:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-}
 
 /* =================================
    メインコンテンツ
@@ -2687,4 +2486,207 @@ body {
     .image-preview img {
         max-width: 250px !important;
     }
+}
+
+
+/* アドミンボタンコンテナ */
+.admin-login-container {
+    position: relative;
+    z-index: 50;
+    text-align: right;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+/* アドミンボタン */
+.admin-login-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 51;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-login-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.admin-login-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* アドミンモーダル */
+.admin-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+
+.admin-modal-content {
+    background-color: white;
+    margin: 10% auto;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2001;
+    overflow: hidden;
+}
+
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.admin-modal-header h3 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.admin-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.admin-modal-close:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    transform: scale(1.1);
+}
+
+.admin-modal-body {
+    padding: 2rem;
+}
+
+.admin-modal-body p {
+    margin-bottom: 1.5rem;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.admin-modal-body .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-password-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.admin-password-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.admin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+.btn-submit {
+    background-color: #28a745;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: #218838;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .admin-modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    .admin-modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .admin-modal-body {
+        padding: 1.5rem;
+    }
+    
+    .admin-modal-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+        padding: 0.8rem;
+    }
+}
+
+/* フォーカス管理 */
+.admin-login-btn:focus,
+.admin-modal-close:focus,
+.admin-password-input:focus,
+.btn-cancel:focus,
+.btn-submit:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
 }
