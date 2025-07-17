@@ -341,10 +341,13 @@ nav {
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
+    max-height: 80vh; /* 最大高さを設定 */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
+    overflow: hidden; /* ヘッダー部分は固定 */
     position: relative;
     animation: modalSlideIn 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes modalSlideIn {
@@ -365,6 +368,7 @@ nav {
     padding: 1.5rem 2rem;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border-bottom: 1px solid rgba(164, 165, 132, 0.2);
+    flex-shrink: 0; /* ヘッダーが縮まないようにする */
 }
 
 .official-info-header h3 {
@@ -400,6 +404,9 @@ nav {
 .official-info-body {
     padding: 2rem;
     line-height: 1.6;
+    overflow-y: auto; /* 縦スクロールを有効にする */
+    flex: 1; /* 残りの高さを使用 */
+    max-height: calc(80vh - 80px); /* ヘッダー分を差し引いた高さ */
 }
 
 /* Instagram セクション */
@@ -553,6 +560,81 @@ nav {
     }
 }
 
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .official-info-content {
+        width: 95%;
+        margin: 5% auto;
+        max-height: 90vh; /* モバイルでは高さを少し大きく */
+    }
+    
+    .official-info-body {
+        padding: 1.5rem;
+        max-height: calc(90vh - 70px); /* モバイル用の高さ調整 */
+    }
+    
+    .official-info-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .official-info-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .instagram-section,
+    .bug-report-section,
+    .about-section {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .official-info-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        margin-left: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .official-info-content {
+        width: 98%;
+        margin: 2% auto;
+        max-height: 95vh; /* 小画面では最大高さを増やす */
+    }
+    
+    .official-info-body {
+        padding: 1rem;
+        max-height: calc(95vh - 60px); /* 小画面用の高さ調整 */
+    }
+    
+    .official-info-header {
+        padding: 0.8rem 1rem;
+    }
+    
+    .instagram-btn {
+        width: 100%;
+        margin-top: 0.8rem;
+    }
+}
+
+/* 公式情報モーダルのスクロールバーカスタマイズ */
+.official-info-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.official-info-body::-webkit-scrollbar-track {
+    background: rgba(164, 165, 132, 0.1);
+    border-radius: 3px;
+}
+
+.official-info-body::-webkit-scrollbar-thumb {
+    background: rgba(164, 165, 132, 0.3);
+    border-radius: 3px;
+}
+
+.official-info-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(164, 165, 132, 0.5);
+}
 
 /* =================================
    メインコンテンツ
