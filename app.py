@@ -20,6 +20,8 @@ import html
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func, desc, or_
 from models import db, User, Post, Like
+from supabase import create_client, Client
+import base64
 
 
 load_dotenv()
@@ -31,6 +33,15 @@ app = Flask(__name__)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL（PostgreSQL URL）が.envファイルに設定されていません。")
+
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY')
+
+if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    raise ValueError("SUPABASE_URLとSUPABASE_ANON_KEYが.envファイルに設定されていません。")
+
+# Supabaseクライアント初期化
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -124,6 +135,79 @@ if not app.debug:
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
 
+# --- Supabase Storage関連関数 ---
+
+def upload_image_to_supabase(file, filename):
+    """Supabase Storageに画像をアップロード"""
+    try:
+        # ファイルの内容を読み取り
+        file.seek(0)
+        file_content = file.read()
+        
+        # Supabase Storageにアップロード
+        result = supabase.storage.from_("uploads").upload(
+            path=filename,
+            file=file_content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        if result.status_code == 200:
+            # 公開URLを取得
+            public_url = supabase.storage.from_("uploads").get_public_url(filename)
+            return public_url, None
+        else:
+            return None, f"アップロードエラー: {result.status_code}"
+            
+    except Exception as e:
+        print(f"Supabase upload error: {e}")
+        return None, "ファイルのアップロードに失敗しました。"
+
+def delete_image_from_supabase(image_path):
+    """Supabase Storageから画像を削除"""
+    try:
+        # URLからファイル名を抽出
+        if "/uploads/" in image_path:
+            filename = image_path.split("/uploads/")[-1]
+        else:
+            filename = image_path.split("/")[-1]
+        
+        # Supabase Storageから削除
+        result = supabase.storage.from_("uploads").remove([filename])
+        
+        if result.status_code != 200:
+            print(f"Supabase delete warning: {result.status_code}")
+            
+    except Exception as e:
+        print(f"Supabase delete error: {e}")
+
+def process_uploaded_image(file):
+    """アップロード画像の処理（Supabase Storage版）"""
+    try:
+        # 基本検証
+        if not file or not file.filename:
+            return None, "ファイルが選択されていません。"
+        
+        # サイズチェック
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        
+        if file_size > 10 * 1024 * 1024:  # 10MB
+            return None, "ファイルサイズは10MB以下にしてください。"
+        
+        # 画像として開けるかチェック
+        img = Image.open(file)
+        file.seek(0)
+        
+        # 形式チェック
+        if img.format.lower() not in ['jpeg', 'jpg', 'png']:
+            return None, "JPEG、PNG形式の画像のみ対応しています。"
+        
+        return file, None
+        
+    except Exception as e:
+        print(f"Image processing error: {e}")
+        return None, "画像ファイルの処理中にエラーが発生しました。"
 
 # --- データベース関連 ---
 
@@ -261,40 +345,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def process_uploaded_image(file):
-    """アップロード画像の処理"""
-    import io
-    
-    # 基本検証
-    if not file or not file.filename:
-        return None, "ファイルが選択されていません。"
-    
-    # サイズチェック
-    file.seek(0, os.SEEK_END)
-    file_size = file.tell()
-    file.seek(0)
-    
-    if file_size > 10 * 1024 * 1024:  # 10MB
-        return None, "ファイルサイズは10MB以下にしてください。"
-    
-    try:
-        # 画像として開けるかチェック
-        img = Image.open(file)
-        file.seek(0)
-        
-        # 形式チェック
-        if img.format.lower() not in ['jpeg', 'jpg', 'png']:
-            return None, "JPEG、PNG形式の画像のみ対応しています。"
-        
-        # 解像度チェック（必要に応じて）
-        if img.width > 4000 or img.height > 4000:
-            print(f"High resolution image detected: {img.width}x{img.height}")
-        
-        return file, None
-        
-    except Exception as e:
-        print(f"Image processing error: {e}")
-        return None, "画像ファイルの処理中にエラーが発生しました。"
+
 
 def validate_text_length(text, max_length, field_name):
     """テキストの長さを検証する"""
@@ -409,16 +460,23 @@ def post():
                                  store_name=store_name, area=area, caption=caption, price_range_selected=price_range,
                                  school_selected=school)
 
-        # ファイル保存とデータベース処理
+        # Supabase Storageにファイルアップロード
         safe_filename = secure_filename(image.filename)
         filename = f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}_{safe_filename}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        web_image_path = os.path.join('uploads', filename).replace('\\', '/')
+        
+        # 画像をSupabaseにアップロード
+        public_url, upload_error = upload_image_to_supabase(image, filename)
+        
+        if upload_error:
+            flash(upload_error, 'error')
+            return render_template('post.html', price_options=price_options, school_options=school_options, username=username,
+                                 store_name=store_name, area=area, caption=caption, price_range_selected=price_range,
+                                 school_selected=school)
         
         try:
             new_post = Post(
                 user_id=user_id,
-                image_path=web_image_path,
+                image_path=public_url,  # Supabaseの公開URLを保存
                 caption=caption,
                 price_range=price_range,
                 area=area,
@@ -429,23 +487,19 @@ def post():
             db.session.add(new_post)
             db.session.commit()
             
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-            image.save(filepath)
-            
             flash('投稿が完了しました！', 'success')
             return redirect(url_for('index'))
             
         except SQLAlchemyError as e:
             db.session.rollback()
-            if os.path.exists(filepath):
-                try:
-                    os.remove(filepath)
-                except OSError:
-                    pass
+            # アップロード済みの画像を削除
+            delete_image_from_supabase(public_url)
             print(f"Database error in post: {e}")
             flash('データベースエラーが発生しました。もう一度お試しください。', 'error')
         except Exception as e:
             db.session.rollback()
+            # アップロード済みの画像を削除
+            delete_image_from_supabase(public_url)
             print(f"Unexpected error in post: {e}")
             flash('投稿の保存中にエラーが発生しました。もう一度お試しください。', 'error')
 
@@ -736,11 +790,9 @@ def admin_delete_post(post_id):
             # 画像ファイルも削除
             if post.image_path:
                 try:
-                    image_path = os.path.join(app.root_path, 'static', post.image_path)
-                    if os.path.exists(image_path):
-                        os.remove(image_path)
-                except OSError as e:
-                    print(f"Error deleting image file {post.image_path}: {e}")
+                    delete_image_from_supabase(post.image_path)
+                except Exception as e:
+                    print(f"Error deleting image from Supabase: {e}")
             
             flash('投稿を削除しました。', 'success')
         else:
@@ -775,11 +827,9 @@ def delete_post(post_id):
         # 画像ファイルの削除
         if post.image_path:
             try:
-                image_path = os.path.join(app.root_path, 'static', post.image_path)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
-            except OSError as e:
-                print(f"Warning: Could not delete image file {post.image_path}: {e}")
+                delete_image_from_supabase(post.image_path)
+                except Exception as e:
+                    print(f"Error deleting image from Supabase: {e}")
         
         flash('投稿を削除しました。', 'success')
         
