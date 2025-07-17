@@ -540,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (instagramBtn) {
             instagramBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const instagramURL = 'https://instagram.com/oshimeshi_yamanashi';
+                const instagramURL = 'https://www.instagram.com/oshimeshi_yamanashi?igsh=MWQ4Z2ZvYnl3dGxjNA%3D%3D&utm_source=qr';
             
                 if (this.getAttribute('href') === '#' || !this.getAttribute('href')) {
                     alert('Instagramアカウントは近日公開予定です！\nしばらくお待ちください。');
