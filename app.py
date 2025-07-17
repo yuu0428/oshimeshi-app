@@ -828,7 +828,7 @@ def delete_post(post_id):
         if post.image_path:
             try:
                 delete_image_from_supabase(post.image_path)
-                except Exception as e:
+            except Exception as e:
                     print(f"Error deleting image from Supabase: {e}")
         
         flash('投稿を削除しました。', 'success')
