@@ -150,7 +150,11 @@
             {% for post in posts %}
                 <div class="post-card">
                     {% if post.image_path %}
-                        <img src="{{ url_for('static', filename=post.image_path) }}" alt="店舗画像" class="post-image">
+                        {% if post.image_path.startswith('https://') %}
+                            <img src="{{ post.image_path }}" alt="投稿画像" class="post-image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
+                        {% endif %}
                     {% endif %}
                     <div class="post-content">
                         <h3>{{ post.store_name }}</h3>

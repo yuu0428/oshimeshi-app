@@ -59,7 +59,6 @@
         <div class="ranking-container">
             {% for post in posts %}
                 <div class="ranking-item">
-                    <!-- 以下は変更なし -->
                     <!-- ランキングバッジ -->
                     {% if loop.index <= 3 %}
                         <div class="ranking-badge rank-{{ loop.index }}">
@@ -81,7 +80,11 @@
                     <!-- 投稿画像 -->
                     <div class="post-image-container">
                         {% if post.image_path %}
-                            <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
+                            {% if post.image_path.startswith('https://') %}
+                                <img src="{{ post.image_path }}" alt="投稿画像" class="post-image">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
+                            {% endif %}
                         {% else %}
                             <div class="no-image">🍽️</div>
                         {% endif %}
