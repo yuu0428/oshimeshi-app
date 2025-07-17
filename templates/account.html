@@ -43,58 +43,99 @@
         </div>
     {% else %}
         <!-- 控えめな管理者ログインボタン -->
-        <div style="text-align: right; margin-bottom: 1em;">
-            <button type="button" id="adminLoginBtn" style="background-color: #6c757d; color: white; padding: 0.3em 0.6em; font-size: 0.8em; border: none; border-radius: 3px; cursor: pointer;">🔐 Admin</button>
+        <div class="admin-login-container">
+            <button type="button" id="adminLoginBtn" class="admin-login-btn">🔐 Admin</button>
         </div>
 
         <!-- モーダル背景 -->
-        <div id="adminModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-            <!-- モーダルコンテンツ -->
-            <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border-radius: 8px; width: 400px; max-width: 90%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0;">🔐 管理者権限の取得</h3>
-                    <button type="button" id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">&times;</button>
+        <div id="adminModal" class="admin-modal">
+            <div class="admin-modal-content">
+                <div class="admin-modal-header">
+                    <h3>🔐 管理者権限の取得</h3>
+                    <button type="button" id="closeModal" class="admin-modal-close">&times;</button>
                 </div>
-                <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">管理者パスワードを入力してください。</p>
-                <form method="post" action="{{ url_for('admin_login') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div style="margin-bottom: 15px;">
-                        <input type="password" name="admin_password" placeholder="管理者パスワード" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="button" id="cancelBtn" style="background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">キャンセル</button>
-                        <button type="submit" style="background-color: #5cb85c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">ログイン</button>
-                    </div>
-                </form>
+                <div class="admin-modal-body">
+                    <p>管理者パスワードを入力してください。</p>
+                    <form method="post" action="{{ url_for('admin_login') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="form-group">
+                            <input type="password" name="admin_password" placeholder="管理者パスワード" required class="admin-password-input">
+                        </div>
+                        <div class="admin-modal-actions">
+                            <button type="button" id="cancelBtn" class="btn-cancel">キャンセル</button>
+                            <button type="submit" class="btn-submit">ログイン</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
+
         <script>
-            // モーダル表示・非表示の制御
-            document.getElementById('adminLoginBtn').addEventListener('click', function() {
-                document.getElementById('adminModal').style.display = 'block';
-                document.querySelector('#adminModal input[name="admin_password"]').focus();
-            });
-
-            document.getElementById('closeModal').addEventListener('click', function() {
-                document.getElementById('adminModal').style.display = 'none';
-            });
-
-            document.getElementById('cancelBtn').addEventListener('click', function() {
-                document.getElementById('adminModal').style.display = 'none';
-            });
-
-            // モーダル背景クリックで閉じる
-            document.getElementById('adminModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
+            document.addEventListener('DOMContentLoaded', function() {
+                const adminLoginBtn = document.getElementById('adminLoginBtn');
+                const adminModal = document.getElementById('adminModal');
+                const closeModal = document.getElementById('closeModal');
+                const cancelBtn = document.getElementById('cancelBtn');
+                const passwordInput = document.querySelector('input[name="admin_password"]');
+    
+                // アドミンボタンクリック
+                if (adminLoginBtn) {
+                    adminLoginBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                
+                        adminModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                
+                        // フォーカスをパスワード入力欄に
+                        if (passwordInput) {
+                            setTimeout(() => passwordInput.focus(), 100);
+                        }
+                    });
                 }
-            });
-
-            // Escキーで閉じる
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && document.getElementById('adminModal').style.display === 'block') {
-                    document.getElementById('adminModal').style.display = 'none';
+    
+                // モーダルを閉じる関数
+                function closeAdminModal() {
+                    adminModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    if (adminLoginBtn) {
+                        adminLoginBtn.focus();
+                    }
+                }
+    
+                // 閉じるボタン
+                if (closeModal) {
+                    closeModal.addEventListener('click', closeAdminModal);
+                }
+    
+                // キャンセルボタン
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', closeAdminModal);
+                }
+    
+                // モーダル背景クリック
+                if (adminModal) {
+                    adminModal.addEventListener('click', function(e) {
+                        if (e.target === adminModal) {
+                            closeAdminModal();
+                        }
+                    });
+                }
+    
+                // ESCキー
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && adminModal.style.display === 'block') {
+                        closeAdminModal();
+                    }
+                });
+    
+                // フォーム送信時の処理
+                const adminForm = adminModal.querySelector('form');
+                if (adminForm) {
+                    adminForm.addEventListener('submit', function() {
+                        document.body.style.overflow = 'auto';
+                    });
                 }
             });
         </script>
