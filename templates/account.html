@@ -1,66 +1,179 @@
 {% extends "layout.html" %}
-{% block title %}広告掲載 - {% endblock %}
+{% block title %}マイページ{% endblock %}
 {% block content %}
-    <h1>📢 広告掲載</h1>
+    <h1>マイページ</h1>
+    <p>ようこそ、<strong>{{ session.username or 'ゲスト' }}</strong> さん！ 🎉</p>
     
-    {% if posts %}
-        <div class="ranking-info">
-            🌟 広告掲載中の投稿をいいね数の多い順に表示しています
+    {% if session.is_admin %}
+        <div style="background-color: #fff3cd; padding: 1em; border-radius: 5px; margin-bottom: 1em; border: 1px solid #ffeeba;">
+            <h3>🔧 管理者機能</h3>
+            {% if session.is_advertiser %}
+                <p>あなたは<strong>管理者 兼 広告アカウント</strong>としてログイン中です。</p>
+                <div style="background-color: #d4edda; padding: 0.5em; border-radius: 3px; margin-bottom: 1em; border: 1px solid #c3e6cb;">
+                    <small>📢 広告アカウント権限が有効です</small>
+                </div>
+            {% else %}
+                <p>あなたは管理者権限を持っています。</p>
+            {% endif %}
+            
+            <!-- 管理者の名前変更フォーム -->
+            <h4>ユーザー名の変更</h4>
+            <form method="post" action="{{ url_for('update_admin_username') }}" style="margin-bottom: 1em;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" name="new_username" placeholder="新しいユーザー名" value="{{ session.username or '' }}" maxlength="50" style="flex: 1;">
+                    <button type="submit" onclick="return confirm('ユーザー名を変更しますか？');">変更</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 1em; padding-top: 1em; border-top: 1px solid #ffeeba;">
+                <form method="post" action="{{ url_for('privileged_logout') }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" onclick="return confirm('管理者権限からログアウトしますか？');" 
+                            style="background-color: #dc3545; color: white; padding: 0.5em 1em; border: none; border-radius: 4px; cursor: pointer;">
+                        🚪 権限者ログアウト
+                    </button>
+                </form>
+                <small style="display: block; margin-top: 0.5em; color: #666;">
+                    ※ログアウト後もユーザー名と投稿履歴は保持されます
+                </small>
+            </div>
+            
+            <p><small>※管理者は投稿画面で全ての投稿を削除できます。</small></p>
+        </div>
+    {% else %}
+        <!-- 控えめな管理者ログインボタン -->
+        <div class="admin-login-container">
+            <button type="button" id="adminLoginBtn" class="admin-login-btn">🔐 Admin</button>
         </div>
 
-        <div class="ranking-container">
-            {% for post in posts %}
-                <div class="ranking-item">
-                    <!-- 投稿画像 -->
-                    <div class="post-image-container">
-                        {% if post.image_path %}
-                            {% if post.image_path.startswith('https://') %}
-                                <img src="{{ post.image_path }}" alt="投稿画像" class="post-image">
-                            {% else %}
-                                <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
-                            {% endif %}
-                        {% else %}
-                            <div class="no-image">🍽️</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- 投稿情報 -->
-                    <div class="post-info">
-                        <h3 class="store-name">{{ post.store_name }}</h3>
-                        <div class="post-meta">
-                            <span class="meta-item">📍 {{ post.area }}</span>
-                            <span class="meta-item">💰 {{ post.price_range }}</span>
-                            <span class="meta-item">👤 {{ post.username }}</span>
-                            {% if post.school %}
-                                <span class="meta-item">🏫 {{ post.school }}</span>
-                            {% endif %}
+        <!-- モーダル背景 -->
+        <div id="adminModal" class="admin-modal">
+            <div class="admin-modal-content">
+                <div class="admin-modal-header">
+                    <h3>🔐 管理者権限の取得</h3>
+                    <button type="button" id="closeModal" class="admin-modal-close">&times;</button>
+                </div>
+                <div class="admin-modal-body">
+                    <p>管理者パスワードを入力してください。</p>
+                    <form method="post" action="{{ url_for('admin_login') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="form-group">
+                            <input type="password" name="admin_password" placeholder="管理者パスワード" required class="admin-password-input">
                         </div>
-                        <div class="post-caption">{{ post.caption }}</div>
-                    </div>
-                    
-                    <!-- アクション部分 -->
-                    <div class="post-actions">
-                        <button type="button" class="like-button{% if post.id in liked_posts %} liked{% endif %}" data-post-id="{{ post.id }}">
-                            <span class="heart-icon">{% if post.id in liked_posts %}❤️{% else %}🤍{% endif %}</span>
-                            <span class="like-count">{{ post.like_count }}</span>
-                        </button>
-                        
-                        {% if session.is_admin %}
-                            <form method="POST" action="{{ url_for('admin_delete_post', post_id=post.id) }}" 
-                                  class="delete-form"
-                                  onsubmit="return confirm('この投稿を削除してもよろしいですか？');">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="delete-button">🗑️ 削除</button>
-                            </form>
+                        <div class="admin-modal-actions">
+                            <button type="button" id="cancelBtn" class="btn-cancel">キャンセル</button>
+                            <button type="submit" class="btn-submit">ログイン</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const adminLoginBtn = document.getElementById('adminLoginBtn');
+                const adminModal = document.getElementById('adminModal');
+                const closeModal = document.getElementById('closeModal');
+                const cancelBtn = document.getElementById('cancelBtn');
+                const passwordInput = document.querySelector('input[name="admin_password"]');
+    
+                // アドミンボタンクリック
+                if (adminLoginBtn) {
+                    adminLoginBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                
+                        adminModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                
+                        // フォーカスをパスワード入力欄に
+                        if (passwordInput) {
+                            setTimeout(() => passwordInput.focus(), 100);
+                        }
+                    });
+                }
+    
+                // モーダルを閉じる関数
+                function closeAdminModal() {
+                    adminModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    if (adminLoginBtn) {
+                        adminLoginBtn.focus();
+                    }
+                }
+    
+                // 閉じるボタン
+                if (closeModal) {
+                    closeModal.addEventListener('click', closeAdminModal);
+                }
+    
+                // キャンセルボタン
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', closeAdminModal);
+                }
+    
+                // モーダル背景クリック
+                if (adminModal) {
+                    adminModal.addEventListener('click', function(e) {
+                        if (e.target === adminModal) {
+                            closeAdminModal();
+                        }
+                    });
+                }
+    
+                // ESCキー
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && adminModal.style.display === 'block') {
+                        closeAdminModal();
+                    }
+                });
+    
+                // フォーム送信時の処理
+                const adminForm = adminModal.querySelector('form');
+                if (adminForm) {
+                    adminForm.addEventListener('submit', function() {
+                        document.body.style.overflow = 'auto';
+                    });
+                }
+            });
+        </script>
+    {% endif %}
+    
+    <h2>あなたの投稿履歴 📝</h2>
+    <div class="info-note">
+        💡 ヒント: ブラウザのデータを削除するとアカウント情報が失われます
+    </div>
+    <div class="posts-container">
+        {% if posts %}
+            {% for post in posts %}
+                <div class="post-card">
+                    {% if post.image_path %}
+                        {% if post.image_path.startswith('https://') %}
+                            <img src="{{ post.image_path }}" alt="店舗画像" class="post-image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=post.image_path) }}" alt="店舗画像" class="post-image">
                         {% endif %}
+                    {% endif %}
+                    <div class="post-content">
+                        <h3>{{ post.store_name }}</h3>
+                        <p class="post-meta">
+                            📍 地域: {{ post.area }} | 💰 価格帯: {{ post.price_range }}
+                            {% if post.school %} | 🏫 高校: {{ post.school }}{% endif %}
+                        </p>
+                        <p class="post-caption">{{ post.caption }}</p>
+                        <p>❤️ いいね数: {{ post.like_count }}</p>
+                        <small>📅 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') if post.created_at else 'N/A' }}</small>
+                        <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="margin-top: 10px;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" onclick="return confirm('本当にこの投稿を削除しますか？');" class="delete-button">🗑️ 削除</button>
+                        </form>
                     </div>
                 </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty-state">
-            <div class="empty-icon">📢</div>
-            <p>現在、広告掲載中の投稿はありません。</p>
-        </div>
-    {% endif %}
+        {% else %}
+            <p>まだ投稿がありません。初めての推しメシを投稿してみましょう！ ✨</p>
+        {% endif %}
+    </div>
 {% endblock %}
