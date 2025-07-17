@@ -147,10 +147,12 @@ def upload_image_to_supabase(file, filename):
     """Supabase Storageに画像をアップロード"""
     try:
         client = get_supabase_client()
-
+        print(f"Supabase client created: {client}")
+        
         # ファイルの内容を読み取り
         file.seek(0)
         file_content = file.read()
+        print(f"File content length: {len(file_content)}")
         
         # Supabase Storageにアップロード
         result = client.storage.from_("uploads").upload(
@@ -159,12 +161,16 @@ def upload_image_to_supabase(file, filename):
             file_options={"content-type": file.content_type}
         )
         
-        if result.status_code == 200:
+        print(f"Upload result: {result}")
+        
+        if hasattr(result, 'status_code') and result.status_code == 200:
             # 公開URLを取得
-            public_url = supabase.storage.from_("uploads").get_public_url(filename)
+            public_url = client.storage.from_("uploads").get_public_url(filename)
+            print(f"Public URL: {public_url}")
             return public_url, None
         else:
-            return None, f"アップロードエラー: {result.status_code}"
+            print(f"Upload failed: {result}")
+            return None, f"アップロードエラー: {result}"
             
     except Exception as e:
         print(f"Supabase upload error: {e}")
@@ -174,7 +180,7 @@ def delete_image_from_supabase(image_path):
     """Supabase Storageから画像を削除"""
     try:
         client = get_supabase_client()
-
+        
         # URLからファイル名を抽出
         if "/uploads/" in image_path:
             filename = image_path.split("/uploads/")[-1]
@@ -183,9 +189,7 @@ def delete_image_from_supabase(image_path):
         
         # Supabase Storageから削除
         result = client.storage.from_("uploads").remove([filename])
-        
-        if result.status_code != 200:
-            print(f"Supabase delete warning: {result.status_code}")
+        print(f"Supabase delete result: {result}")  # デバッグ用
             
     except Exception as e:
         print(f"Supabase delete error: {e}")
