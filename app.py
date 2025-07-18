@@ -190,58 +190,71 @@ def delete_image_from_supabase(image_path):
         # URLからファイル名を抽出（改良版）
         filename = None
         
+        # URLパースしてクエリパラメータを除去
+        parsed_url = urlparse(image_path)
+        clean_url = parsed_url.scheme + "://" + parsed_url.netloc + parsed_url.path
+        
         # 1. Supabase公開URLの場合
-        if "supabase.co" in image_path and "/object/public/" in image_path:
+        if "supabase.co" in clean_url and "/object/public/uploads/" in clean_url:
             # 例: https://xxx.supabase.co/storage/v1/object/public/uploads/filename.jpg
-            parts = image_path.split("/object/public/uploads/")
+            parts = clean_url.split("/object/public/uploads/")
             if len(parts) > 1:
                 filename = parts[1]
         # 2. /uploads/が含まれる場合（従来の方法）
-        elif "/uploads/" in image_path:
-            filename = image_path.split("/uploads/")[-1]
+        elif "/uploads/" in clean_url:
+            filename = clean_url.split("/uploads/")[-1]
         # 3. 単純なファイル名の場合
         else:
-            # URLパースを使用してより正確に抽出
-            parsed_url = urlparse(image_path)
+            # パス部分からファイル名を抽出
             path_parts = parsed_url.path.split('/')
             if path_parts:
                 filename = path_parts[-1]
+        
+        # ファイル名のクリーンアップ（追加の安全対策）
+        if filename:
+            # URLデコード（日本語ファイル名対応）
+            from urllib.parse import unquote
+            filename = unquote(filename)
+            # 不要な文字を除去
+            filename = filename.strip('?&')
         
         if not filename:
             print(f"Error: Could not extract filename from path: {image_path}")
             return False
         
-        print(f"Extracted filename: {filename}")
+        print(f"Extracted clean filename: {filename}")
         
         # Supabase Storageから削除
         result = client.storage.from_("uploads").remove([filename])
         print(f"Supabase delete result: {result}")
         
-        # 削除結果の確認（Supabaseの仕様に応じて調整）
-        if result:
-            # resultがリストの場合、削除されたファイル情報が含まれる
-            if isinstance(result, list) and len(result) > 0:
-                deleted_file = result[0]
-                if 'name' in deleted_file and deleted_file['name'] == filename:
-                    print(f"Successfully deleted file: {filename}")
-                    return True
-                else:
-                    print(f"File deletion may have failed: {deleted_file}")
-                    return False
-            # resultが辞書の場合
-            elif isinstance(result, dict):
-                if result.get('error'):
-                    print(f"Supabase delete error: {result['error']}")
-                    return False
-                else:
-                    print(f"Successfully deleted file: {filename}")
-                    return True
+        # 削除結果の確認
+        if isinstance(result, list):
+            if len(result) == 0:
+                # 空のリストはファイルが見つからなかった可能性
+                print(f"File not found or already deleted: {filename}")
+                return True  # 既に削除済みと判断
             else:
-                print(f"Unknown result format: {result}")
-                return True  # 結果が不明だが、エラーが発生していないと仮定
+                deleted_file = result[0]
+                if isinstance(deleted_file, dict):
+                    if 'name' in deleted_file and deleted_file['name'] == filename:
+                        print(f"Successfully deleted file: {filename}")
+                        return True
+                    elif deleted_file.get('error'):
+                        print(f"Supabase delete error: {deleted_file['error']}")
+                        return False
+                print(f"File deletion completed: {deleted_file}")
+                return True
+        elif isinstance(result, dict):
+            if result.get('error'):
+                print(f"Supabase delete error: {result['error']}")
+                return False
+            else:
+                print(f"Successfully deleted file: {filename}")
+                return True
         else:
-            print(f"Empty result returned for deletion of: {filename}")
-            return False
+            print(f"Unknown result format: {result}")
+            return True
             
     except Exception as e:
         print(f"Exception during Supabase delete: {str(e)}")
