@@ -22,6 +22,7 @@ from sqlalchemy import func, desc, or_
 from models import db, User, Post, Like
 from supabase import create_client, Client
 import base64
+from urllib.parse import urlparse
 
 
 load_dotenv()
@@ -177,22 +178,75 @@ def upload_image_to_supabase(file, filename):
         return None, "ファイルのアップロードに失敗しました。"
 
 def delete_image_from_supabase(image_path):
-    """Supabase Storageから画像を削除"""
+    """Supabase Storageから画像を削除（改良版）"""
+    if not image_path:
+        print("Warning: image_path is empty or None")
+        return False
+        
     try:
         client = get_supabase_client()
+        print(f"Attempting to delete image: {image_path}")
         
-        # URLからファイル名を抽出
-        if "/uploads/" in image_path:
+        # URLからファイル名を抽出（改良版）
+        filename = None
+        
+        # 1. Supabase公開URLの場合
+        if "supabase.co" in image_path and "/object/public/" in image_path:
+            # 例: https://xxx.supabase.co/storage/v1/object/public/uploads/filename.jpg
+            parts = image_path.split("/object/public/uploads/")
+            if len(parts) > 1:
+                filename = parts[1]
+        # 2. /uploads/が含まれる場合（従来の方法）
+        elif "/uploads/" in image_path:
             filename = image_path.split("/uploads/")[-1]
+        # 3. 単純なファイル名の場合
         else:
-            filename = image_path.split("/")[-1]
+            # URLパースを使用してより正確に抽出
+            parsed_url = urlparse(image_path)
+            path_parts = parsed_url.path.split('/')
+            if path_parts:
+                filename = path_parts[-1]
+        
+        if not filename:
+            print(f"Error: Could not extract filename from path: {image_path}")
+            return False
+        
+        print(f"Extracted filename: {filename}")
         
         # Supabase Storageから削除
         result = client.storage.from_("uploads").remove([filename])
-        print(f"Supabase delete result: {result}")  # デバッグ用
+        print(f"Supabase delete result: {result}")
+        
+        # 削除結果の確認（Supabaseの仕様に応じて調整）
+        if result:
+            # resultがリストの場合、削除されたファイル情報が含まれる
+            if isinstance(result, list) and len(result) > 0:
+                deleted_file = result[0]
+                if 'name' in deleted_file and deleted_file['name'] == filename:
+                    print(f"Successfully deleted file: {filename}")
+                    return True
+                else:
+                    print(f"File deletion may have failed: {deleted_file}")
+                    return False
+            # resultが辞書の場合
+            elif isinstance(result, dict):
+                if result.get('error'):
+                    print(f"Supabase delete error: {result['error']}")
+                    return False
+                else:
+                    print(f"Successfully deleted file: {filename}")
+                    return True
+            else:
+                print(f"Unknown result format: {result}")
+                return True  # 結果が不明だが、エラーが発生していないと仮定
+        else:
+            print(f"Empty result returned for deletion of: {filename}")
+            return False
             
     except Exception as e:
-        print(f"Supabase delete error: {e}")
+        print(f"Exception during Supabase delete: {str(e)}")
+        print(f"Exception type: {type(e).__name__}")
+        return False
 
 def process_uploaded_image(file):
     """アップロード画像の処理（Supabase Storage版）"""
@@ -506,14 +560,24 @@ def post():
             
         except SQLAlchemyError as e:
             db.session.rollback()
-            # アップロード済みの画像を削除
-            delete_image_from_supabase(public_url)
+            # アップロード済みの画像を削除（修正版）
+            if public_url:
+                delete_success = delete_image_from_supabase(public_url)
+                if delete_success:
+                    print(f"Successfully cleaned up uploaded image after database error: {public_url}")
+                else:
+                    print(f"Failed to clean up uploaded image after database error: {public_url}")
             print(f"Database error in post: {e}")
             flash('データベースエラーが発生しました。もう一度お試しください。', 'error')
         except Exception as e:
             db.session.rollback()
-            # アップロード済みの画像を削除
-            delete_image_from_supabase(public_url)
+            # アップロード済みの画像を削除（修正版）
+            if public_url:
+                delete_success = delete_image_from_supabase(public_url)
+                if delete_success:
+                    print(f"Successfully cleaned up uploaded image after unexpected error: {public_url}")
+                else:
+                    print(f"Failed to clean up uploaded image after unexpected error: {public_url}")
             print(f"Unexpected error in post: {e}")
             flash('投稿の保存中にエラーが発生しました。もう一度お試しください。', 'error')
 
@@ -795,18 +859,24 @@ def admin_delete_post(post_id):
     try:
         post = Post.query.get(post_id)
         if post:
+            # 画像パスを保存（削除前に）
+            image_path = post.image_path
+            
             # 関連するいいねを削除
             Like.query.filter_by(post_id=post_id).delete()
             # 投稿を削除
             db.session.delete(post)
             db.session.commit()
             
-            # 画像ファイルも削除
-            if post.image_path:
-                try:
-                    delete_image_from_supabase(post.image_path)
-                except Exception as e:
-                    print(f"Error deleting image from Supabase: {e}")
+            # 画像ファイルも削除（修正版）
+            if image_path:
+                delete_success = delete_image_from_supabase(image_path)
+                if delete_success:
+                    print(f"Successfully deleted image file: {image_path}")
+                else:
+                    print(f"Failed to delete image file: {image_path}")
+                    # 画像削除失敗はログに記録するが、ユーザーエラーにはしない
+                    # （投稿データの削除は成功しているため）
             
             flash('投稿を削除しました。', 'success')
         else:
@@ -831,6 +901,9 @@ def delete_post(post_id):
             flash('削除権限がないか、投稿が存在しません。', 'error')
             return redirect(url_for('account'))
         
+        # 画像パスを保存（削除前に）
+        image_path = post.image_path
+        
         # 関連するいいねを削除
         Like.query.filter_by(post_id=post_id).delete()
         
@@ -838,12 +911,15 @@ def delete_post(post_id):
         db.session.delete(post)
         db.session.commit()
         
-        # 画像ファイルの削除
-        if post.image_path:
-            try:
-                delete_image_from_supabase(post.image_path)
-            except Exception as e:
-                    print(f"Error deleting image from Supabase: {e}")
+        # 画像ファイルの削除（修正版）
+        if image_path:
+            delete_success = delete_image_from_supabase(image_path)
+            if delete_success:
+                print(f"Successfully deleted image file: {image_path}")
+            else:
+                print(f"Failed to delete image file: {image_path}")
+                # 画像削除失敗はログに記録するが、ユーザーエラーにはしない
+                # （投稿データの削除は成功しているため）
         
         flash('投稿を削除しました。', 'success')
         
