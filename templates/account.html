@@ -21,7 +21,7 @@
             <form method="post" action="{{ url_for('update_admin_username') }}" style="margin-bottom: 1em;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" name="new_username" placeholder="新しいユーザー名" value="{{ session.username or '' }}" maxlength="50" style="flex: 1;">
+                    <input type="text" name="new_username" placeholder="新しいユーザー名" value="{{ session.username or '' }}" maxlength="50" style="flex: 1;" autocomplete="off">
                     <button type="submit" onclick="return confirm('ユーザー名を変更しますか？');">変更</button>
                 </div>
             </form>
@@ -59,7 +59,7 @@
                     <form method="post" action="{{ url_for('admin_login') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group">
-                            <input type="password" name="admin_password" placeholder="管理者パスワード" required class="admin-password-input">
+                            <input type="password" name="admin_password" placeholder="管理者パスワード" required class="admin-password-input" autocomplete="new-password">
                         </div>
                         <div class="admin-modal-actions">
                             <button type="button" id="cancelBtn" class="btn-cancel">キャンセル</button>

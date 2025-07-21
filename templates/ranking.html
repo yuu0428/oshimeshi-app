@@ -26,7 +26,7 @@
                 <input type="hidden" name="type" value="school">
                 <div class="form-group">
                     <label for="school">🏫 高校を選択:</label>
-                    <select name="school" id="school" class="school-select">
+                    <select name="school" id="school" class="school-select" autocomplete="off">
                         <option value="">-- 高校を選択してください --</option>
                         {% for school_name in schools_with_posts %}
                             <option value="{{ school_name.school }}" {% if school_name.school == selected_school %}selected{% endif %}>

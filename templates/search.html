@@ -3,15 +3,15 @@
 {% block content %}
     <h1>みんなの推しメシを検索 🔍</h1>
     
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" autocomplete="off">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div>
             <label for="area">📍 地域:</label>
-            <input type="text" id="area" name="area" value="{{ search_criteria.area or '' }}" placeholder="例: 甲府">
+            <input type="text" id="area" name="area" value="{{ search_criteria.area or '' }}" placeholder="例: 甲府" autocomplete="off">
         </div>
         <div>
             <label for="store_name">🏪 店名:</label>
-            <input type="text" id="store_name" name="store_name" value="{{ search_criteria.store_name or '' }}" placeholder="例: カフェ">
+            <input type="text" id="store_name" name="store_name" value="{{ search_criteria.store_name or '' }}" placeholder="例: カフェ" autocomplete="off">
         </div>
         <div>
             <label for="price_range">💰 価格帯:</label>

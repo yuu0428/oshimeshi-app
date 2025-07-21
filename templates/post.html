@@ -3,22 +3,22 @@
 {% block content %}
     <h1>推しメシを投稿 🍴</h1>
     <p>ようこそ、{{ username }} さん！あなたのおすすめのお店を教えてください ✨</p>
-    <form method="post" enctype="multipart/form-data" class="post-form">
+    <form method="post" enctype="multipart/form-data" class="post-form" autocomplete="off">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="form-group">
             <label for="image">📸 写真 (JPEG/PNG):</label>
-            <input type="file" id="image" name="image" accept="image/jpeg, image/png" required>
+            <input type="file" id="image" name="image" accept="image/jpeg, image/png" required autocomplete="off">
         </div>
         
         <div class="form-group">
             <label for="store_name">🏪 店名:</label>
-            <input type="text" id="store_name" name="store_name" value="{{ store_name }}" required maxlength="50">
+            <input type="text" id="store_name" name="store_name" value="{{ store_name }}" required maxlength="50" autocomplete="off">
         </div>
         
         <div class="form-group">
             <label for="area">📍 地域 (例: 山梨県◯◯市):</label>
-            <input type="text" id="area" name="area" value="{{ area }}" required>
+            <input type="text" id="area" name="area" value="{{ area }}" required autocomplete="off">
         </div>
         
         <div class="form-group">
@@ -42,7 +42,7 @@
         
         <div class="form-group">
             <label for="caption">📝 紹介文・コメント:</label>
-            <textarea id="caption" name="caption" rows="5" required maxlength="500">{{ caption }}</textarea>
+            <textarea id="caption" name="caption" rows="5" required maxlength="500" autocomplete="off">{{ caption }}</textarea>
         </div>
         
         <div class="form-group">
