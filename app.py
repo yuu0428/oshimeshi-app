@@ -18,7 +18,7 @@ import shutil
 from flask_talisman import Talisman
 import html
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func, desc, or_
+from sqlalchemy import func, desc, or_, text
 from models import db, User, Post, Like
 from supabase import create_client, Client
 import base64
@@ -1204,28 +1204,16 @@ def robots():
 def uptimerobot_check():
     """UptimeRobot専用の軽量チェック"""
     try:
-        # デバッグ情報をログに出力
-        print("uptimerobot endpoint accessed")
-        
-        # データベース接続テスト
-        result = db.session.execute('SELECT 1')
-        print("DB connection successful")
-        
+        db.session.execute(text('SELECT 1'))
         return 'OK', 200
-    except Exception as e:
-        # エラー詳細をログに出力
-        print(f"Error in uptimerobot_check: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        import traceback
-        print(f"Traceback: {traceback.format_exc()}")
-        
-        return f'ERROR: {str(e)}', 500
+    except Exception:
+        return 'ERROR', 500
 
 @app.route('/health')
 def health_check():
     """ヘルスチェック用"""
     try:
-        db.session.execute('SELECT 1')
+        db.session.execute(text('SELECT 1'))
         return 'OK', 200
     except Exception:
         return 'ERROR', 500
