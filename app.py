@@ -1204,10 +1204,22 @@ def robots():
 def uptimerobot_check():
     """UptimeRobot専用の軽量チェック"""
     try:
-        db.session.execute('SELECT 1')
+        # デバッグ情報をログに出力
+        print("uptimerobot endpoint accessed")
+        
+        # データベース接続テスト
+        result = db.session.execute('SELECT 1')
+        print("DB connection successful")
+        
         return 'OK', 200
-    except Exception:
-        return 'ERROR', 500
+    except Exception as e:
+        # エラー詳細をログに出力
+        print(f"Error in uptimerobot_check: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        
+        return f'ERROR: {str(e)}', 500
 
 @app.route('/health')
 def health_check():
