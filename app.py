@@ -1218,29 +1218,75 @@ def health_check():
     except Exception:
         return 'ERROR', 500
 
-@app.cli.command('cleanup-users')
-def cleanup_users_command():
-    """投稿のない古いユーザーを削除"""
+@app.route('/admin/cleanup-users')
+def admin_cleanup_users():
+    """管理者専用：投稿もいいねもないユーザーをクリーンアップ"""
+    token = request.args.get('token')
+    if token != 'temp123':  # 簡単なトークン
+        return 'Unauthorized', 401
+    
     try:
-        # 投稿のないユーザーを特定（管理者アカウント除く）
-        users_without_posts = User.query.outerjoin(Post).filter(
-            User.id != 1,  # 管理者アカウント除外
-            Post.id == None
+        # 投稿があるユーザーのIDを取得
+        users_with_posts_subquery = db.session.query(User.id).join(Post).distinct().subquery()
+        
+        # いいねをしたユーザーのIDを取得  
+        users_with_likes_subquery = db.session.query(User.id).join(Like).distinct().subquery()
+        
+        # 投稿もいいねもないユーザーを特定（管理者アカウント除く）
+        inactive_users = User.query.filter(
+            User.id != 1,  # 管理者アカウント（ID=1）を除外
+            ~User.id.in_(db.session.query(users_with_posts_subquery.c.id)),
+            ~User.id.in_(db.session.query(users_with_likes_subquery.c.id))
         ).all()
         
-        deleted_count = len(users_without_posts)
+        deleted_count = len(inactive_users)
         
-        for user in users_without_posts:
-            # いいねも削除
+        # ユーザーを削除
+        for user in inactive_users:
             Like.query.filter_by(user_id=user.id).delete()
             db.session.delete(user)
         
         db.session.commit()
-        print(f'{deleted_count}人のユーザーを削除しました')
+        
+        return f'✅ {deleted_count}人の不要なユーザーを削除しました', 200
         
     except Exception as e:
         db.session.rollback()
-        print(f'エラー: {e}')
+        return f'❌ エラー: {str(e)}', 500
+
+@app.route('/admin/user-stats')
+def admin_user_stats():
+    """ユーザー統計を表示"""
+    token = request.args.get('token')
+    if token != 'temp123':
+        return 'Unauthorized', 401
+    
+    try:
+        total_users = User.query.count()
+        users_with_posts = db.session.query(User.id).join(Post).distinct().count()
+        users_with_likes = db.session.query(User.id).join(Like).distinct().count()
+        
+        users_with_posts_subquery = db.session.query(User.id).join(Post).distinct().subquery()
+        users_with_likes_subquery = db.session.query(User.id).join(Like).distinct().subquery()
+        
+        inactive_users_count = User.query.filter(
+            User.id != 1,
+            ~User.id.in_(db.session.query(users_with_posts_subquery.c.id)),
+            ~User.id.in_(db.session.query(users_with_likes_subquery.c.id))
+        ).count()
+        
+        return f'''
+        <h2>📊 ユーザー統計</h2>
+        <ul>
+            <li><strong>総ユーザー数:</strong> {total_users}人</li>
+            <li><strong>投稿したユーザー:</strong> {users_with_posts}人</li>  
+            <li><strong>いいねしたユーザー:</strong> {users_with_likes}人</li>
+            <li><strong>🗑️削除対象ユーザー:</strong> {inactive_users_count}人</li>
+        </ul>
+        ''', 200
+        
+    except Exception as e:
+        return f'❌ エラー: {str(e)}', 500
 
 if __name__ == '__main__':
     import os
