@@ -1222,31 +1222,41 @@ def health_check():
 def admin_cleanup_users():
     """管理者専用：投稿もいいねもないユーザーをクリーンアップ"""
     token = request.args.get('token')
-    if token != 'temp123':  # 簡単なトークン
+    if token != 'temp123':
         return 'Unauthorized', 401
     
     try:
-        # 投稿があるユーザーのIDを取得
-        users_with_posts_subquery = db.session.query(User.id).join(Post).distinct().subquery()
+        # まず削除対象ユーザーを特定するだけ
+        all_users = User.query.filter(User.id != 1).all()
+        users_to_delete = []
         
-        # いいねをしたユーザーのIDを取得  
-        users_with_likes_subquery = db.session.query(User.id).join(Like).distinct().subquery()
+        for user in all_users:
+            post_count = Post.query.filter_by(user_id=user.id).count()
+            like_count = Like.query.filter_by(user_id=user.id).count()
+            
+            if post_count == 0 and like_count == 0:
+                users_to_delete.append(user)
         
-        # 投稿もいいねもないユーザーを特定（管理者アカウント除く）
-        inactive_users = User.query.filter(
-            User.id != 1,  # 管理者アカウント（ID=1）を除外
-            ~User.id.in_(db.session.query(users_with_posts_subquery.c.id)),
-            ~User.id.in_(db.session.query(users_with_likes_subquery.c.id))
-        ).all()
+        deleted_count = len(users_to_delete)
         
-        deleted_count = len(inactive_users)
-        
-        # ユーザーを削除
-        for user in inactive_users:
-            Like.query.filter_by(user_id=user.id).delete()
-            db.session.delete(user)
-        
-        db.session.commit()
+        # 1人ずつ慎重に削除
+        for user in users_to_delete:
+            try:
+                # 関連するいいねを先に削除
+                Like.query.filter_by(user_id=user.id).delete()
+                
+                # ユーザーを削除
+                db.session.delete(user)
+                
+                # 1人削除するごとにコミット
+                db.session.commit()
+                
+            except Exception as user_error:
+                # 1人のユーザー削除が失敗しても続行
+                db.session.rollback()
+                print(f"Failed to delete user {user.id}: {user_error}")
+                deleted_count -= 1
+                continue
         
         return f'✅ {deleted_count}人の不要なユーザーを削除しました', 200
         
