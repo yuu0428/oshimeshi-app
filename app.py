@@ -1226,37 +1226,31 @@ def admin_cleanup_users():
         return 'Unauthorized', 401
     
     try:
-        # まず削除対象ユーザーを特定するだけ
-        all_users = User.query.filter(User.id != 1).all()
-        users_to_delete = []
+        from sqlalchemy import text
         
-        for user in all_users:
-            post_count = Post.query.filter_by(user_id=user.id).count()
-            like_count = Like.query.filter_by(user_id=user.id).count()
-            
-            if post_count == 0 and like_count == 0:
-                users_to_delete.append(user)
+        # 効率的なSQL一発削除
+        # Step 1: 削除対象ユーザーのIDを取得
+        delete_query = text("""
+            DELETE FROM users 
+            WHERE id != 1 
+            AND id NOT IN (SELECT DISTINCT user_id FROM posts)
+            AND id NOT IN (SELECT DISTINCT user_id FROM likes)
+        """)
         
-        deleted_count = len(users_to_delete)
+        # Step 2: 関連するlikesレコードを先に削除
+        cleanup_likes_query = text("""
+            DELETE FROM likes 
+            WHERE user_id NOT IN (SELECT id FROM users WHERE id != 1)
+        """)
         
-        # 1人ずつ慎重に削除
-        for user in users_to_delete:
-            try:
-                # 関連するいいねを先に削除
-                Like.query.filter_by(user_id=user.id).delete()
-                
-                # ユーザーを削除
-                db.session.delete(user)
-                
-                # 1人削除するごとにコミット
-                db.session.commit()
-                
-            except Exception as user_error:
-                # 1人のユーザー削除が失敗しても続行
-                db.session.rollback()
-                print(f"Failed to delete user {user.id}: {user_error}")
-                deleted_count -= 1
-                continue
+        # 削除実行
+        result = db.session.execute(delete_query)
+        deleted_count = result.rowcount
+        
+        # 孤立したlikesも削除
+        db.session.execute(cleanup_likes_query)
+        
+        db.session.commit()
         
         return f'✅ {deleted_count}人の不要なユーザーを削除しました', 200
         
