@@ -375,9 +375,28 @@ def get_sorted_schools():
     remaining_schools = [school for school in SCHOOLS if school not in used_schools]
     return used_schools + remaining_schools
 
+def is_uptimerobot_request():
+    """UptimeRobotからのアクセスかを判定"""
+    user_agent = request.headers.get('User-Agent', '').lower()
+    
+    # UptimeRobotのユーザーエージェントパターン
+    if 'uptimerobot' in user_agent or 'uptime robot' in user_agent:
+        return True
+    
+    # ヘルスチェック用のパスの場合
+    if request.path in ['/health', '/ping', '/uptimerobot']:
+        return True
+    
+    return False
+
 @app.before_request
 def load_logged_in_user():
     from flask import g
+    
+    # UptimeRobotからのアクセスの場合、ユーザーを作成しない
+    if is_uptimerobot_request():
+        g.user = None
+        return
     
     user_id = session.get('user_id')
 
@@ -1180,6 +1199,48 @@ def make_session_permanent():
 @app.route('/robots.txt')
 def robots():
     return app.send_static_file('robots.txt')
+
+@app.route('/uptimerobot')
+def uptimerobot_check():
+    """UptimeRobot専用の軽量チェック"""
+    try:
+        db.session.execute('SELECT 1')
+        return 'OK', 200
+    except Exception:
+        return 'ERROR', 500
+
+@app.route('/health')
+def health_check():
+    """ヘルスチェック用"""
+    try:
+        db.session.execute('SELECT 1')
+        return 'OK', 200
+    except Exception:
+        return 'ERROR', 500
+
+@app.cli.command('cleanup-users')
+def cleanup_users_command():
+    """投稿のない古いユーザーを削除"""
+    try:
+        # 投稿のないユーザーを特定（管理者アカウント除く）
+        users_without_posts = User.query.outerjoin(Post).filter(
+            User.id != 1,  # 管理者アカウント除外
+            Post.id == None
+        ).all()
+        
+        deleted_count = len(users_without_posts)
+        
+        for user in users_without_posts:
+            # いいねも削除
+            Like.query.filter_by(user_id=user.id).delete()
+            db.session.delete(user)
+        
+        db.session.commit()
+        print(f'{deleted_count}人のユーザーを削除しました')
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f'エラー: {e}')
 
 if __name__ == '__main__':
     import os
