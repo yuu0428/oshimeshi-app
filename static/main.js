@@ -1089,13 +1089,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // 投稿詳細モーダル内の画像をクリックした時
         function setupModalImageClick() {
             const modalImage = document.querySelector('#postDetailModal .modal-image');
-            if (modalImage) {
-                modalImage.addEventListener('click', function() {
-                    const imageSrc = this.src;
-                    if (imageSrc) {
+            if (modalImage && !modalImage.hasAttribute('data-fullscreen-enabled')) {
+                modalImage.setAttribute('data-fullscreen-enabled', 'true');
+                
+                function imageClickHandler() {
+                    const imageSrc = modalImage.src;
+                    console.log('画像クリックされました:', imageSrc); // デバッグ用
+                    if (imageSrc && imageSrc !== '') {
                         showFullscreenImage(imageSrc);
                     }
+                }
+                
+                // クリックイベントとタッチイベントの両方を設定
+                modalImage.addEventListener('click', imageClickHandler);
+                modalImage.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    imageClickHandler();
                 });
+                
+                // 画像がクリック可能であることを視覚的に示す
+                modalImage.style.cursor = 'pointer';
+                modalImage.title = '画像をクリックして拡大表示';
             }
         }
 
@@ -1161,8 +1175,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         const target = mutation.target;
                         if (target.style.display === 'block') {
+                            console.log('投稿詳細モーダルが表示されました'); // デバッグ用
                             // モーダルが表示された時に画像クリック機能を再設定
-                            setTimeout(setupModalImageClick, 100);
+                            setTimeout(setupModalImageClick, 200);
+                            // さらに遅延をかけて再度実行（画像の読み込みを待つ）
+                            setTimeout(setupModalImageClick, 500);
                         }
                     }
                 });
@@ -1172,6 +1189,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 attributes: true,
                 attributeFilter: ['style']
             });
+            
+            // 追加: モーダル内の画像が変更された時も監視
+            const modalImageContainer = postDetailModal.querySelector('.modal-image-container');
+            if (modalImageContainer) {
+                const imageObserver = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                            console.log('モーダル画像のsrcが変更されました'); // デバッグ用
+                            setTimeout(setupModalImageClick, 100);
+                        }
+                    });
+                });
+                
+                const modalImage = modalImageContainer.querySelector('.modal-image');
+                if (modalImage) {
+                    imageObserver.observe(modalImage, {
+                        attributes: true,
+                        attributeFilter: ['src']
+                    });
+                }
+            }
         }
 
         // 初期設定
