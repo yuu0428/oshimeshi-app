@@ -158,10 +158,11 @@
                     {% endif %}
                     <div class="post-content">
                         <h3>{{ post.store_name }}</h3>
-                        <p class="post-meta">
-                            📍 地域: {{ post.area }} | 💰 価格帯: {{ post.price_range }}
-                            {% if post.school %} | 🏫 高校: {{ post.school }}{% endif %}
-                        </p>
+                        <div class="post-meta">
+                            <span><strong>📍 地域:</strong> {{ post.area }}</span>
+                            <span><strong>💰 価格帯:</strong> {{ post.price_range }}</span>
+                            {% if post.school %}<span><strong>🏫 高校:</strong> {{ post.school }}</span>{% endif %}
+                        </div>
                         <p class="post-caption">{{ post.caption }}</p>
                         <p>❤️ いいね数: {{ post.like_count }}</p>
                         <small>📅 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') if post.created_at else 'N/A' }}</small>

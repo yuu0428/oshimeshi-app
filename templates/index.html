@@ -16,10 +16,10 @@
                 <div class="post-content">
                     <h3>{{ post.store_name }}</h3>
                     <div class="post-meta">
-                        <strong>📍 地域:</strong> {{ post.area }} | 
-                        <strong>💰 価格帯:</strong> {{ post.price_range }} | 
-                        <strong>👤 投稿者:</strong> {{ post.username }}
-                        {% if post.school %} | <strong>🏫 高校:</strong> {{ post.school }}{% endif %}
+                        <span><strong>📍 地域:</strong> {{ post.area }}</span>
+                        <span><strong>💰 価格帯:</strong> {{ post.price_range }}</span>
+                        <span><strong>👤 投稿者:</strong> {{ post.username }}</span>
+                        {% if post.school %}<span><strong>🏫 高校:</strong> {{ post.school }}</span>{% endif %}
                     </div>
                     <div class="post-caption">{{ post.caption }}</div>
                     <div class="post-actions">
