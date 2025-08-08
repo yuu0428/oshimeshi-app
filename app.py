@@ -1124,7 +1124,7 @@ def advertisements():
          .outerjoin(Like, Post.id == Like.post_id) \
          .filter(Post.user_id == 1) \
          .group_by(Post.id, User.username) \
-         .order_by(desc('like_count'), desc(Post.created_at)) \
+         .order_by(desc(Post.created_at)) \
          .all()
         
         # いいねした投稿のIDを取得

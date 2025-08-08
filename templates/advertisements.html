@@ -4,55 +4,35 @@
     <h1>📢 広告掲載</h1>
     
     {% if posts %}
-        <div class="ranking-info">
-            🌟 広告掲載中の投稿をいいね数の多い順に表示しています
-        </div>
-
-        <div class="ranking-container">
+        <div class="posts-container">
             {% for post in posts %}
-                <div class="ranking-item">
-                    <!-- 投稿画像 -->
-                    <div class="post-image-container">
-                        {% if post.image_path %}
-                            {% if post.image_path.startswith('https://') %}
-                                <img src="{{ post.image_path }}" alt="投稿画像" class="post-image">
-                            {% else %}
-                                <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
-                            {% endif %}
+                <div class="post-card" data-post-id="{{ post.id }}" data-store-name="{{ post.store_name }}" data-area="{{ post.area }}" data-price-range="{{ post.price_range }}" data-username="{{ post.username }}" data-school="{{ post.school or '' }}" data-caption="{{ post.caption }}" data-like-count="{{ post.like_count }}">
+                    {% if post.image_path %}
+                        {% if post.image_path.startswith('https://') %}
+                            <img src="{{ post.image_path }}" alt="投稿画像" class="post-image">
                         {% else %}
-                            <div class="no-image">🍽️</div>
+                            <img src="{{ url_for('static', filename=post.image_path) }}" alt="投稿画像" class="post-image">
                         {% endif %}
-                    </div>
-                    
-                    <!-- 投稿情報 -->
-                    <div class="post-info">
-                        <h3 class="store-name">{{ post.store_name }}</h3>
+                    {% endif %}
+                    <div class="post-content">
+                        <h3>{{ post.store_name }}</h3>
                         <div class="post-meta">
-                            <span class="meta-item">📍 {{ post.area }}</span>
-                            <span class="meta-item">💰 {{ post.price_range }}</span>
-                            <span class="meta-item">👤 {{ post.username }}</span>
-                            {% if post.school %}
-                                <span class="meta-item">🏫 {{ post.school }}</span>
-                            {% endif %}
+                            <span><strong>📍 地域:</strong> {{ post.area }}</span>
+                            <span><strong>💰 価格帯:</strong> {{ post.price_range }}</span>
+                            <span><strong>👤 投稿者:</strong> {{ post.username }}</span>
+                            {% if post.school %}<span><strong>🏫 高校:</strong> {{ post.school }}</span>{% endif %}
                         </div>
                         <div class="post-caption">{{ post.caption }}</div>
-                    </div>
-                    
-                    <!-- アクション部分 -->
-                    <div class="post-actions">
-                        <button type="button" class="like-button{% if post.id in liked_posts %} liked{% endif %}" data-post-id="{{ post.id }}">
-                            <span class="heart-icon">{% if post.id in liked_posts %}❤️{% else %}🤍{% endif %}</span>
-                            <span class="like-count">{{ post.like_count }}</span>
-                        </button>
-                        
-                        {% if session.is_admin %}
-                            <form method="POST" action="{{ url_for('admin_delete_post', post_id=post.id) }}" 
-                                  class="delete-form"
-                                  onsubmit="return confirm('この投稿を削除してもよろしいですか？');">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="delete-button">🗑️ 削除</button>
-                            </form>
-                        {% endif %}
+                        <div class="post-actions">
+                            {% if session.is_admin %}
+                                <form method="POST" action="{{ url_for('admin_delete_post', post_id=post.id) }}" 
+                                      style="display: inline-block; margin-left: 10px;"
+                                      onsubmit="return confirm('この投稿を削除してもよろしいですか？');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="delete-button">🗑️削除</button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
