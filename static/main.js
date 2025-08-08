@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.cursor = 'pointer';
         });
 
-        // モーダル閉じるボタン（タッチ対応強化）
+        // デスクトップ用閉じるボタン
         if (closeBtn && !closeBtn.hasAttribute('data-touch-enhanced')) {
             closeBtn.setAttribute('data-touch-enhanced', 'true');
             
@@ -366,41 +366,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.style.overflow = 'auto';
             }
             
-            // iPhone Safari用の特別処理
-            if (isiOSSafari()) {
-                closeBtn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('iOS Safari: バツボタンtouchend'); // デバッグ用
-                    closeModal();
-                });
-                
-                closeBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('iOS Safari: バツボタンclick'); // デバッグ用
-                    closeModal();
-                });
-                
-                // iOS Safari用スタイル強化
-                closeBtn.style.webkitTouchCallout = 'none';
-                closeBtn.style.webkitUserSelect = 'none';
-                closeBtn.style.touchAction = 'manipulation';
-                closeBtn.style.webkitTapHighlightColor = 'rgba(0,0,0,0.3)';
-            } else {
-                closeBtn.addEventListener('click', closeModal);
-                closeBtn.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    closeModal();
-                });
+            // デスクトップ用のシンプルなイベント
+            closeBtn.addEventListener('click', closeModal);
+        }
+
+        // モバイル用閉じるボタンの設定
+        const mobileCloseBtn = document.getElementById('closeMobileModal');
+        if (mobileCloseBtn && !mobileCloseBtn.hasAttribute('data-mobile-enhanced')) {
+            mobileCloseBtn.setAttribute('data-mobile-enhanced', 'true');
+            
+            function closeMobileModal() {
+                console.log('モバイル用バツボタンがクリックされました'); // デバッグ用
+                postModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
             }
             
-            // モバイルデバイスでの視認性向上
-            if (isMobileDevice()) {
-                closeBtn.style.background = 'rgba(255, 255, 255, 0.98)';
-                closeBtn.style.border = '2px solid rgba(0, 0, 0, 0.2)';
-                closeBtn.style.color = '#333';
-                closeBtn.style.fontWeight = '900';
+            // iPhone Safari用の特別処理
+            if (isiOSSafari()) {
+                mobileCloseBtn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('iOS Safari: モバイルバツボタンtouchend'); // デバッグ用
+                    closeMobileModal();
+                });
+                
+                mobileCloseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('iOS Safari: モバイルバツボタンclick'); // デバッグ用
+                    closeMobileModal();
+                });
+            } else {
+                // その他のモバイルブラウザ
+                mobileCloseBtn.addEventListener('click', closeMobileModal);
+                mobileCloseBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    closeMobileModal();
+                });
             }
         }
 
