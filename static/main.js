@@ -357,12 +357,28 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.cursor = 'pointer';
         });
 
-        // モーダル閉じるボタン（一度だけ設定）
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function() {
+        // モーダル閉じるボタン（タッチ対応強化）
+        if (closeBtn && !closeBtn.hasAttribute('data-touch-enhanced')) {
+            closeBtn.setAttribute('data-touch-enhanced', 'true');
+            
+            function closeModal() {
                 postModal.style.display = 'none';
                 document.body.style.overflow = 'auto';
+            }
+            
+            closeBtn.addEventListener('click', closeModal);
+            closeBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                closeModal();
             });
+            
+            // モバイルデバイスでの視認性向上
+            if (isMobileDevice()) {
+                closeBtn.style.background = 'rgba(255, 255, 255, 0.98)';
+                closeBtn.style.border = '2px solid rgba(0, 0, 0, 0.2)';
+                closeBtn.style.color = '#333';
+                closeBtn.style.fontWeight = '900';
+            }
         }
 
         // モーダル外クリックで閉じる（一度だけ設定）
@@ -806,6 +822,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return iOSSafari;
     }
 
+    // モバイルデバイス検出関数
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               window.innerWidth <= 768;
+    }
+
     // 検索・フィルタ機能
     function initializeSearchFilters() {
         // iOS Safariの場合は特別な処理を行わない
@@ -1109,8 +1131,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
 
-        // 閉じるボタンのクリックイベント
+        // 閉じるボタンのクリックイベント（タッチ対応強化）
         closeFullscreenBtn.addEventListener('click', closeFullscreenImage);
+        closeFullscreenBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            closeFullscreenImage();
+        });
 
         // オーバーレイクリックで閉じる（画像以外をクリック）
         fullscreenOverlay.addEventListener('click', function(e) {
