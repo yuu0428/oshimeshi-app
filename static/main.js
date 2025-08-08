@@ -1052,4 +1052,106 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // 全画面画像表示機能
+    function initializeFullscreenImage() {
+        const fullscreenModal = document.getElementById('fullscreenImageModal');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const closeFullscreenBtn = document.getElementById('closeFullscreenModal');
+        const fullscreenOverlay = document.querySelector('.fullscreen-modal-overlay');
+
+        if (!fullscreenModal || !fullscreenImage || !closeFullscreenBtn) {
+            return;
+        }
+
+        // 投稿詳細モーダル内の画像をクリックした時
+        function setupModalImageClick() {
+            const modalImage = document.querySelector('#postDetailModal .modal-image');
+            if (modalImage) {
+                modalImage.addEventListener('click', function() {
+                    const imageSrc = this.src;
+                    if (imageSrc) {
+                        showFullscreenImage(imageSrc);
+                    }
+                });
+            }
+        }
+
+        // 全画面画像を表示
+        function showFullscreenImage(imageSrc) {
+            fullscreenImage.src = imageSrc;
+            fullscreenModal.style.display = 'block';
+            
+            // アニメーション用のクラスを追加
+            setTimeout(() => {
+                fullscreenModal.classList.add('show');
+                fullscreenModal.classList.add('opening');
+            }, 10);
+
+            // ボディのスクロールを無効化
+            document.body.style.overflow = 'hidden';
+
+            // フォーカスを閉じるボタンに移動
+            setTimeout(() => {
+                closeFullscreenBtn.focus();
+            }, 100);
+        }
+
+        // 全画面画像を閉じる
+        function closeFullscreenImage() {
+            fullscreenModal.classList.remove('show');
+            fullscreenModal.classList.remove('opening');
+            
+            setTimeout(() => {
+                fullscreenModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                fullscreenImage.src = '';
+            }, 300);
+        }
+
+        // 閉じるボタンのクリックイベント
+        closeFullscreenBtn.addEventListener('click', closeFullscreenImage);
+
+        // オーバーレイクリックで閉じる（画像以外をクリック）
+        fullscreenOverlay.addEventListener('click', function(e) {
+            if (e.target === fullscreenOverlay) {
+                closeFullscreenImage();
+            }
+        });
+
+        // ESCキーで閉じる
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && fullscreenModal.style.display === 'block') {
+                closeFullscreenImage();
+            }
+        });
+
+        // 投稿詳細モーダルが表示された時に画像クリック機能を設定
+        const postDetailModal = document.getElementById('postDetailModal');
+        if (postDetailModal) {
+            // MutationObserverで投稿詳細モーダルの表示状態を監視
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        if (target.style.display === 'block') {
+                            // モーダルが表示された時に画像クリック機能を再設定
+                            setTimeout(setupModalImageClick, 100);
+                        }
+                    }
+                });
+            });
+
+            observer.observe(postDetailModal, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        }
+
+        // 初期設定
+        setupModalImageClick();
+    }
+
+    // 全画面画像機能を初期化
+    initializeFullscreenImage();
 });

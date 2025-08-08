@@ -2073,6 +2073,168 @@ select:disabled {
 }
 
 /* =================================
+   全画面画像モーダル
+================================= */
+.fullscreen-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.fullscreen-modal.show {
+    opacity: 1;
+}
+
+.fullscreen-modal-overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.fullscreen-close {
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10001;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.fullscreen-close:hover {
+    background: rgba(220, 53, 69, 0.8);
+    border-color: #dc3545;
+    transform: scale(1.1);
+    color: white;
+}
+
+.fullscreen-image-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fullscreen-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.fullscreen-image:hover {
+    transform: scale(1.02);
+}
+
+/* 投稿詳細モーダル内の画像をクリック可能にする */
+.modal-image {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-image:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .fullscreen-modal-overlay {
+        padding: 1rem;
+    }
+    
+    .fullscreen-close {
+        right: 1rem;
+        top: 1rem;
+        width: 45px;
+        height: 45px;
+        font-size: 28px;
+    }
+    
+    .fullscreen-image {
+        border-radius: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fullscreen-modal-overlay {
+        padding: 0.5rem;
+    }
+    
+    .fullscreen-close {
+        right: 0.5rem;
+        top: 0.5rem;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+}
+
+/* タッチデバイス対応 */
+@media (hover: none) and (pointer: coarse) {
+    .fullscreen-image:hover {
+        transform: none;
+    }
+    
+    .modal-image:hover {
+        transform: none;
+        filter: none;
+    }
+}
+
+/* アニメーション */
+@keyframes fullscreenFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fullscreen-modal.opening .fullscreen-image {
+    animation: fullscreenFadeIn 0.3s ease forwards;
+}
+
+/* フォーカス管理 */
+.fullscreen-close:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* =================================
    統計バー
 ================================= */
 .stats-bar {
