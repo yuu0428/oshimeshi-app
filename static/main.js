@@ -366,11 +366,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.body.style.overflow = 'auto';
             }
             
-            closeBtn.addEventListener('click', closeModal);
-            closeBtn.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                closeModal();
-            });
+            // iPhone Safari用の特別処理
+            if (isiOSSafari()) {
+                closeBtn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('iOS Safari: バツボタンtouchend'); // デバッグ用
+                    closeModal();
+                });
+                
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('iOS Safari: バツボタンclick'); // デバッグ用
+                    closeModal();
+                });
+                
+                // iOS Safari用スタイル強化
+                closeBtn.style.webkitTouchCallout = 'none';
+                closeBtn.style.webkitUserSelect = 'none';
+                closeBtn.style.touchAction = 'manipulation';
+                closeBtn.style.webkitTapHighlightColor = 'rgba(0,0,0,0.3)';
+            } else {
+                closeBtn.addEventListener('click', closeModal);
+                closeBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    closeModal();
+                });
+            }
             
             // モバイルデバイスでの視認性向上
             if (isMobileDevice()) {
@@ -1100,12 +1123,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                // クリックイベントとタッチイベントの両方を設定
-                modalImage.addEventListener('click', imageClickHandler);
-                modalImage.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    imageClickHandler();
-                });
+                // iPhone Safari用の特別な処理
+                if (isiOSSafari()) {
+                    // iOS Safariではtouchendを使用
+                    modalImage.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('iOS Safari: 画像touchendイベント'); // デバッグ用
+                        imageClickHandler();
+                    });
+                    
+                    // iOS Safariでも念のためclickイベントも追加
+                    modalImage.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('iOS Safari: 画像clickイベント'); // デバッグ用
+                        imageClickHandler();
+                    });
+                    
+                    // iOS Safari用のスタイル強化
+                    modalImage.style.webkitTouchCallout = 'none';
+                    modalImage.style.webkitUserSelect = 'none';
+                    modalImage.style.touchAction = 'manipulation';
+                } else {
+                    // その他のブラウザ用
+                    modalImage.addEventListener('click', imageClickHandler);
+                    modalImage.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        imageClickHandler();
+                    });
+                }
                 
                 // 画像がクリック可能であることを視覚的に示す
                 modalImage.style.cursor = 'pointer';
@@ -1145,12 +1192,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
 
-        // 閉じるボタンのクリックイベント（タッチ対応強化）
-        closeFullscreenBtn.addEventListener('click', closeFullscreenImage);
-        closeFullscreenBtn.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            closeFullscreenImage();
-        });
+        // 閉じるボタンのクリックイベント（iPhone Safari対応強化）
+        if (isiOSSafari()) {
+            closeFullscreenBtn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('iOS Safari: 全画面閉じるボタンtouchend'); // デバッグ用
+                closeFullscreenImage();
+            });
+            
+            closeFullscreenBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('iOS Safari: 全画面閉じるボタンclick'); // デバッグ用
+                closeFullscreenImage();
+            });
+        } else {
+            closeFullscreenBtn.addEventListener('click', closeFullscreenImage);
+            closeFullscreenBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                closeFullscreenImage();
+            });
+        }
 
         // オーバーレイクリックで閉じる（画像以外をクリック）
         fullscreenOverlay.addEventListener('click', function(e) {
