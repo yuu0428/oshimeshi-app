@@ -527,7 +527,6 @@ def post():
         # バリデーション（必須フィールド）
         validation_error = validate_required_fields(
             画像=image and image.filename,
-            紹介文=caption,
             価格帯=price_range,
             地域=area,
             店名=store_name
