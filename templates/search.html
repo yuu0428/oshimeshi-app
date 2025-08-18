@@ -67,8 +67,8 @@
                             
                             {% set is_ad_post = (post.user_id == config['ADVERTISER_USER_ID']) or post.google_maps_url %}
                             {% if is_ad_post %}
-                              <a class="btn" href="{{ url_for('tracking_ad.go', post_id=post.id) }}">🗺 地図を開く</a>
-                              <a class="btn" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}">🎟 クーポン表示</a>
+                              <a class="btn" href="{{ url_for('tracking_ad.go', post_id=post.id) }}" target="_blank" rel="noopener">🗺 地図を開く</a>
+                              <a class="btn" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" target="_blank" rel="noopener">🎟 クーポン表示</a>
                             {% endif %}
                             
                             {% if session.is_admin %}

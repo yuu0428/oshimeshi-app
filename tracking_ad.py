@@ -49,22 +49,16 @@ def _maps_url(post: "Post") -> str:
     # 許可ドメインのMapsURLを優先、無ければ検索URL
     if post.google_maps_url:
         u = urlparse(post.google_maps_url)
-        print(f"DEBUG: Parsed URL - scheme: {u.scheme}, netloc: {u.netloc}")
         # より緩い許可ドメインチェック
         allowed_domains = {
             "www.google.com", "google.com", "maps.google.com", 
             "maps.app.goo.gl", "goo.gl"
         }
         if u.scheme in {"http", "https"} and u.netloc in allowed_domains:
-            print(f"DEBUG: Using custom Maps URL: {post.google_maps_url}")
             return post.google_maps_url
-        else:
-            print(f"DEBUG: Domain {u.netloc} not in allowed list, falling back to search")
     
     q = f"{post.store_name} {post.area or ''}".strip()
-    search_url = f"https://www.google.com/maps/search/?api=1&query={quote(q)}"
-    print(f"DEBUG: Using search URL: {search_url}")
-    return search_url
+    return f"https://www.google.com/maps/search/?api=1&query={quote(q)}"
 
 def admin_required():
     if not has_export_rights():
@@ -74,23 +68,17 @@ def admin_required():
 @tracking_ad_bp.route("/go/<int:post_id>")
 def go(post_id: int):
     post = Post.query.get_or_404(post_id)
-    print(f"DEBUG: Processing post ID {post_id}, store: {post.store_name}, area: {post.area}")
-    print(f"DEBUG: google_maps_url: {post.google_maps_url}")
-    print(f"DEBUG: is_ad_post: {is_ad_post(post)}")
     
     if is_ad_post(post):
         try:
             db.session.add(MapClick(post_id=post.id))
             db.session.commit()
-            print("DEBUG: MapClick recorded successfully")
         except Exception as e:
             # テーブルが存在しない場合もリダイレクトは継続
             print(f"MapClick tracking error: {e}")
             db.session.rollback()
     
-    target_url = _maps_url(post)
-    print(f"DEBUG: Redirecting to: {target_url}")
-    return redirect(target_url, code=302)
+    return redirect(_maps_url(post), code=302)
 
 @tracking_ad_bp.route("/coupon/<int:post_id>")
 def coupon(post_id: int):
