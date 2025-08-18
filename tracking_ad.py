@@ -187,7 +187,4 @@ def reset_coupon_data():
 
 # テーブル作成は手動またはマイグレーションで行ってください
 
-# テンプレート用のコンテキストプロセッサー
-@tracking_ad_bp.context_processor
-def inject_coupon_functions():
-    return dict(has_used_coupon=has_used_coupon, current_user_id=current_user_id)
+# テンプレート用のコンテキストプロセッサーはapp.pyで定義

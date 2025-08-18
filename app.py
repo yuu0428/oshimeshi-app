@@ -125,6 +125,11 @@ app.register_blueprint(tracking_ad_bp)
 def inject_csrf_token():
     return dict(csrf_token=generate_csrf)
 
+@app.context_processor
+def inject_coupon_functions():
+    from tracking_ad import has_used_coupon, current_user_id
+    return dict(has_used_coupon=has_used_coupon, current_user_id=current_user_id)
+
 # CSRFエラーのハンドリング
 @app.errorhandler(400)
 def handle_csrf_error(e):
