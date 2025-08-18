@@ -17,6 +17,7 @@ class CouponEvent(db.Model):
     __tablename__ = "coupon_events"
     id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     code = db.Column(db.String(32), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -38,6 +39,10 @@ def is_ad_post(post: "Post") -> bool:
     # 広告投稿: 投稿者ID=1 または MapsURLあり
     adv_id = current_app.config.get("ADVERTISER_USER_ID", 1)
     return (post.user_id == adv_id) or bool(post.google_maps_url)
+
+def has_used_coupon(post_id: int, user_id: int) -> bool:
+    # ユーザーが指定の投稿のクーポンを既に使用しているかチェック
+    return CouponEvent.query.filter_by(post_id=post_id, user_id=user_id).first() is not None
 
 # --- 補助 ---
 def _coupon_code(post: "Post") -> str:
@@ -85,9 +90,18 @@ def coupon(post_id: int):
     post = Post.query.get_or_404(post_id)
     if not is_ad_post(post):
         abort(404)
+    
+    user_id = current_user_id()
+    if not user_id:
+        abort(403)  # ログインが必要
+    
+    # 既に使用している場合はアクセス拒否
+    if has_used_coupon(post_id, user_id):
+        return render_template("coupon_used.html", post=post)
+    
     code = _coupon_code(post)
     try:
-        db.session.add(CouponEvent(post_id=post.id, code=code))
+        db.session.add(CouponEvent(post_id=post.id, user_id=user_id, code=code))
         db.session.commit()
     except Exception as e:
         # テーブルが存在しない場合もクーポンは表示
@@ -155,3 +169,8 @@ def export_coupon_events():
                     headers={"Content-Disposition":'attachment; filename="coupon_events.csv"'})
 
 # テーブル作成は手動またはマイグレーションで行ってください
+
+# テンプレート用のコンテキストプロセッサー
+@tracking_ad_bp.context_processor
+def inject_coupon_functions():
+    return dict(has_used_coupon=has_used_coupon, current_user_id=current_user_id)

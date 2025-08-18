@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>クーポン使用済み | {{ post.store_name }}</title>
+<style>
+  body{font-family: system-ui, -apple-system,"Noto Sans JP",sans-serif; padding:20px}
+  .box{border:1px solid #ddd; padding:16px; border-radius:12px; max-width:520px; background: #f9f9f9}
+  .used-message{color:#d63384; font-weight:700; margin-bottom: 16px}
+  a.btn{display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid #ccc; text-decoration:none; background:#f5f5f5; color:#333}
+  a.btn:hover{background:#e5e5e5}
+</style>
+<h1>{{ post.store_name }} のクーポン</h1>
+<div class="box">
+  <div class="used-message">⚠️ このクーポンは既に使用されています</div>
+  <p>申し訳ございませんが、クーポンは一人一回までのご利用となります。</p>
+  <p>このクーポンは既にご利用いただいているため、再度表示することはできません。</p>
+</div>
+<p><a class="btn ad-map-clickable" href="{{ url_for('tracking_ad.go', post_id=post.id) }}" target="_blank" rel="noopener noreferrer">🗺 店の地図を開く</a></p>
