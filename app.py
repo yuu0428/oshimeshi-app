@@ -23,6 +23,7 @@ from models import db, User, Post, Like
 from supabase import create_client, Client
 import base64
 from urllib.parse import urlparse
+from tracking_ad import tracking_ad_bp, MapClick, CouponEvent
 
 
 load_dotenv()
@@ -108,11 +109,16 @@ GENDERS = ["男性", "女性", "その他"]
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB制限
 app.secret_key = SECRET_KEY
+app.config.setdefault("COUPON_SECRET", "change-me-in-env")
+app.config.setdefault("ADVERTISER_USER_ID", 1)
 
 #データベース初期化
 db.init_app(app)
 # CSRFProtect設定
 csrf = CSRFProtect(app)
+
+# Blueprint registration
+app.register_blueprint(tracking_ad_bp)
 
 # CSRFトークンをテンプレートで利用可能にする
 @app.context_processor

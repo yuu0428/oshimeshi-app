@@ -28,6 +28,7 @@ class Post(db.Model):
     area = db.Column(db.String(100), nullable=False)
     store_name = db.Column(db.String(50), nullable=False)
     school = db.Column(db.String(100), nullable=True)
+    google_maps_url = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # リレーションシップ

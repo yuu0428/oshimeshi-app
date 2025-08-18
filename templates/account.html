@@ -166,10 +166,18 @@
                         <p class="post-caption">{{ post.caption }}</p>
                         <p>❤️ いいね数: {{ post.like_count }}</p>
                         <small>📅 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') if post.created_at else 'N/A' }}</small>
-                        <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="margin-top: 10px;">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="submit" onclick="return confirm('本当にこの投稿を削除しますか？');" class="delete-button">🗑️ 削除</button>
-                        </form>
+                        <div style="margin-top: 10px;">
+                            {% set is_ad_post = (post.user_id == config['ADVERTISER_USER_ID']) or post.google_maps_url %}
+                            {% if is_ad_post %}
+                              <a class="btn" href="{{ url_for('tracking_ad.go', post_id=post.id) }}">🗺 地図を開く</a>
+                              <a class="btn" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}">🎟 クーポン表示</a>
+                            {% endif %}
+                            
+                            <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" onclick="return confirm('本当にこの投稿を削除しますか？');" class="delete-button">🗑️ 削除</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

@@ -1,0 +1,17 @@
+<h1>投稿一覧（最新200件）</h1>
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr><th>ID</th><th>店名</th><th>地域</th><th>MapsURL</th><th>編集</th></tr>
+  {% for p in posts %}
+  <tr>
+    <td>{{p.id}}</td>
+    <td>{{p.store_name}}</td>
+    <td>{{p.area}}</td>
+    <td style="max-width:360px; overflow:auto">{{p.google_maps_url or ''}}</td>
+    <td><a href="{{ url_for('tracking_ad.admin_edit_post', post_id=p.id) }}">編集</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<p>
+  <a href="{{ url_for('tracking_ad.export_map_clicks') }}">map_clicks.csv</a> |
+  <a href="{{ url_for('tracking_ad.export_coupon_events') }}">coupon_events.csv</a>
+</p>

@@ -1,0 +1,1 @@
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS google_maps_url VARCHAR(300);

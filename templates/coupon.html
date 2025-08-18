@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>クーポン | {{ post.store_name }}</title>
+<style>
+  body{font-family: system-ui, -apple-system,"Noto Sans JP",sans-serif; padding:20px}
+  .code{font-size:2rem; letter-spacing:.1em; font-weight:700}
+  .box{border:1px solid #ddd; padding:16px; border-radius:12px; max-width:520px}
+  .muted{color:#666; font-size:.9rem}
+  a.btn{display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid #ccc; text-decoration:none}
+</style>
+<h1>{{ post.store_name }} のクーポン</h1>
+<div class="box">
+  <div>会計時にこのコードを見せてください：</div>
+  <div class="code">{{ code }}</div>
+  <ul class="muted">
+    <li>一人一回まで／他割引と併用不可（店舗裁量）</li>
+    <li>有効期限：提示日当日</li>
+  </ul>
+</div>
+<p><a class="btn" href="{{ url_for('tracking_ad.go', post_id=post.id) }}">🗺 店の地図を開く</a></p>
