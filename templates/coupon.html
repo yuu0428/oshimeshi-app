@@ -18,4 +18,19 @@
     <li>有効期限：提示日当日</li>
   </ul>
 </div>
-<p><a class="btn" href="{{ url_for('tracking_ad.go', post_id=post.id) }}" target="_blank" rel="noopener">🗺 店の地図を開く</a></p>
+<p><button class="btn ad-map-btn" data-url="{{ url_for('tracking_ad.go', post_id=post.id) }}">🗺 店の地図を開く</button></p>
+<script>
+// クーポンページ用の個別JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ad-map-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const url = e.target.getAttribute('data-url');
+            if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        }
+    });
+});
+</script>

@@ -1283,4 +1283,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 全画面画像機能を初期化
     initializeFullscreenImage();
+
+    // 広告ボタンのクリックハンドリング
+    function initializeAdButtons() {
+        // 地図ボタンの処理
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('ad-map-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = e.target.getAttribute('data-url');
+                if (url) {
+                    // 即座に新しいタブで開く
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+            }
+        });
+
+        // クーポンボタンの処理
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('ad-coupon-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = e.target.getAttribute('data-url');
+                if (url) {
+                    // 即座に新しいタブで開く
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+            }
+        });
+    }
+
+    // 広告ボタン機能を初期化
+    initializeAdButtons();
 });
