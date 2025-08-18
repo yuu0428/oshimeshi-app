@@ -136,9 +136,4 @@ def export_coupon_events():
                     mimetype="text/csv",
                     headers={"Content-Disposition":'attachment; filename="coupon_events.csv"'})
 
-# --- 一時：新テーブル作成（初回後は無効化推奨） ---
-@tracking_ad_bp.route("/admin/db/create_new_tables")
-def create_new_tables():
-    admin_required()
-    db.create_all()
-    return "ok", 200
+# テーブル作成は手動またはマイグレーションで行ってください
