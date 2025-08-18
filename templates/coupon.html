@@ -20,17 +20,30 @@
 </div>
 <p><button class="btn ad-map-btn" data-url="{{ url_for('tracking_ad.go', post_id=post.id) }}">🗺 店の地図を開く</button></p>
 <script>
-// クーポンページ用の個別JavaScript
+// クーポンページ用の個別JavaScript（モバイル最適化）
 document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('click', function(e) {
+    function handleMapButton(e) {
         if (e.target.classList.contains('ad-map-btn')) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const url = e.target.getAttribute('data-url');
             if (url) {
-                window.open(url, '_blank', 'noopener,noreferrer');
+                // モバイル用の強制的なリダイレクト
+                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                    // モバイルの場合、直接location.hrefで遷移
+                    window.location.href = url;
+                } else {
+                    // デスクトップの場合、新しいタブで開く
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
             }
         }
-    });
+    }
+
+    // タッチとクリック両方に対応
+    document.addEventListener('click', handleMapButton);
+    document.addEventListener('touchend', handleMapButton);
 });
 </script>

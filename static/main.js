@@ -1284,33 +1284,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // 全画面画像機能を初期化
     initializeFullscreenImage();
 
-    // 広告ボタンのクリックハンドリング
+    // 広告ボタンのクリックハンドリング（モバイル最適化）
     function initializeAdButtons() {
-        // 地図ボタンの処理
-        document.addEventListener('click', function(e) {
+        // 地図ボタンの処理（タッチとクリックの両方に対応）
+        function handleMapButton(e) {
             if (e.target.classList.contains('ad-map-btn')) {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
+                
                 const url = e.target.getAttribute('data-url');
                 if (url) {
-                    // 即座に新しいタブで開く
-                    window.open(url, '_blank', 'noopener,noreferrer');
+                    // モバイル用の強制的なリダイレクト
+                    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                        // モバイルの場合、直接location.hrefで遷移
+                        window.location.href = url;
+                    } else {
+                        // デスクトップの場合、新しいタブで開く
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }
                 }
             }
-        });
+        }
 
-        // クーポンボタンの処理
-        document.addEventListener('click', function(e) {
+        // タッチとクリック両方に対応
+        document.addEventListener('click', handleMapButton);
+        document.addEventListener('touchend', handleMapButton);
+
+        // クーポンボタンの処理（コメントアウト中）
+        /*
+        function handleCouponButton(e) {
             if (e.target.classList.contains('ad-coupon-btn')) {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
+                
                 const url = e.target.getAttribute('data-url');
                 if (url) {
-                    // 即座に新しいタブで開く
-                    window.open(url, '_blank', 'noopener,noreferrer');
+                    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                        window.location.href = url;
+                    } else {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }
                 }
             }
-        });
+        }
+        
+        document.addEventListener('click', handleCouponButton);
+        document.addEventListener('touchend', handleCouponButton);
+        */
     }
 
     // 広告ボタン機能を初期化
