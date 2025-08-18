@@ -95,7 +95,12 @@ def coupon(post_id: int):
     if not user_id:
         abort(403)  # ログインが必要
     
-    # 既に使用している場合はアクセス拒否
+    # 広告アカウント(ID=1)の場合は制限なし・カウントなし
+    if is_advertiser_account():
+        code = _coupon_code(post)
+        return render_template("coupon.html", post=post, code=code)
+    
+    # 一般ユーザーの場合は使用回数制限
     if has_used_coupon(post_id, user_id):
         return render_template("coupon_used.html", post=post)
     
@@ -167,6 +172,18 @@ def export_coupon_events():
     return Response(buf.getvalue().encode("utf-8-sig"),
                     mimetype="text/csv",
                     headers={"Content-Disposition":'attachment; filename="coupon_events.csv"'})
+
+# --- データリセット ---
+@tracking_ad_bp.route("/admin/reset_coupon_data", methods=["POST"])
+def reset_coupon_data():
+    admin_required()
+    try:
+        deleted_count = CouponEvent.query.delete()
+        db.session.commit()
+        return f"クーポンデータをリセットしました。削除件数: {deleted_count}件"
+    except Exception as e:
+        db.session.rollback()
+        return f"エラーが発生しました: {e}", 500
 
 # テーブル作成は手動またはマイグレーションで行ってください
 

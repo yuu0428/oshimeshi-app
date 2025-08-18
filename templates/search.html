@@ -68,8 +68,12 @@
                             {% set is_ad_post = (post.user_id == config['ADVERTISER_USER_ID']) or post.google_maps_url %}
                             {% if is_ad_post %}
                               <a class="btn ad-map-clickable" href="{{ url_for('tracking_ad.go', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return true;">🗺 地図を開く</a>
-                              {% if current_user_id() and not has_used_coupon(post.id, current_user_id()) %}
-                                <a class="btn ad-coupon-clickable" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return confirm('本当にクーポンを開きますか？\\n\\nクーポンの利用は一回のみで、開いた場合二度と開けません！');">🎟 クーポン表示</a>
+                              {% if current_user_id() %}
+                                {% if current_user_id() == config['ADVERTISER_USER_ID'] %}
+                                  <a class="btn ad-coupon-clickable" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return true;">🎟 クーポン表示</a>
+                                {% elif not has_used_coupon(post.id, current_user_id()) %}
+                                  <a class="btn ad-coupon-clickable" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return confirm('本当にクーポンを開きますか？\\n\\nクーポンの利用は一回のみで、開いた場合二度と開けません！');">🎟 クーポン表示</a>
+                                {% endif %}
                               {% endif %}
                             {% endif %}
                             
