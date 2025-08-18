@@ -3153,3 +3153,28 @@ body {
     outline: 2px solid #007bff;
     outline-offset: 2px;
 }
+
+/* 広告ボタンスタイル */
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 4px;
+    background: linear-gradient(135deg, #A4A584, #8E8E93);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, #8E8E93, #A4A584);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    color: white;
+    text-decoration: none;
+}
