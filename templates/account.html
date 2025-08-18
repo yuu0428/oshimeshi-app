@@ -169,8 +169,8 @@
                         <div style="margin-top: 10px;">
                             {% set is_ad_post = (post.user_id == config['ADVERTISER_USER_ID']) or post.google_maps_url %}
                             {% if is_ad_post %}
-                              <span class="btn ad-map-clickable" data-url="{{ url_for('tracking_ad.go', post_id=post.id) }}" style="cursor: pointer;">🗺 地図を開く</span>
-                              <!-- <span class="btn ad-coupon-clickable" data-url="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" style="cursor: pointer;">🎟 クーポン表示</span> -->
+                              <a class="btn ad-map-clickable" href="{{ url_for('tracking_ad.go', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return true;">🗺 地図を開く</a>
+                              <!-- <a class="btn ad-coupon-clickable" href="{{ url_for('tracking_ad.coupon', post_id=post.id) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation(); return true;">🎟 クーポン表示</a> -->
                             {% endif %}
                             
                             <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="display: inline;">

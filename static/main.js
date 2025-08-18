@@ -1284,40 +1284,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 全画面画像機能を初期化
     initializeFullscreenImage();
 
-    // 広告テキストのクリック処理（プレビュー回避）
-    function initializeAdTextHandlers() {
-        function handleAdClick(e) {
-            if (e.target.classList.contains('ad-map-clickable')) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const url = e.target.getAttribute('data-url');
-                if (url) {
-                    // すべてのプラットフォームで新しいタブで開く
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                }
-            }
-            
-            // クーポンボタン（現在はコメントアウト中）
-            if (e.target.classList.contains('ad-coupon-clickable')) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const url = e.target.getAttribute('data-url');
-                if (url) {
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                }
-            }
-        }
-
-        // クリックとタッチイベント両方に対応
-        document.addEventListener('click', handleAdClick);
-        document.addEventListener('touchend', function(e) {
-            // タッチエンド時に少し遅延させてクリックイベントの重複を避ける
-            setTimeout(() => handleAdClick(e), 10);
-        });
-    }
-
-    // 広告テキストハンドラーを初期化
-    initializeAdTextHandlers();
+    // 広告リンクは inline onclick="event.stopPropagation()" で処理
+    console.log('Ad links use inline event handling to prevent modal popup');
 });
