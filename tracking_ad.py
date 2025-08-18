@@ -63,8 +63,13 @@ def admin_required():
 def go(post_id: int):
     post = Post.query.get_or_404(post_id)
     if is_ad_post(post):
-        db.session.add(MapClick(post_id=post.id))
-        db.session.commit()
+        try:
+            db.session.add(MapClick(post_id=post.id))
+            db.session.commit()
+        except Exception as e:
+            # テーブルが存在しない場合もリダイレクトは継続
+            print(f"MapClick tracking error: {e}")
+            db.session.rollback()
     return redirect(_maps_url(post), code=302)
 
 @tracking_ad_bp.route("/coupon/<int:post_id>")
@@ -73,8 +78,13 @@ def coupon(post_id: int):
     if not is_ad_post(post):
         abort(404)
     code = _coupon_code(post)
-    db.session.add(CouponEvent(post_id=post.id, code=code))
-    db.session.commit()
+    try:
+        db.session.add(CouponEvent(post_id=post.id, code=code))
+        db.session.commit()
+    except Exception as e:
+        # テーブルが存在しない場合もクーポンは表示
+        print(f"CouponEvent tracking error: {e}")
+        db.session.rollback()
     return render_template("coupon.html", post=post, code=code)
 
 # --- 管理：投稿編集（全投稿編集可） ---

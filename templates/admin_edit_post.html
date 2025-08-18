@@ -1,9 +1,10 @@
 <h1>投稿編集 #{{ post.id }}</h1>
 <form method="post">
-  <div>店名: <input name="store_name" value="{{ post.store_name }}"></div>
-  <div>地域: <input name="area" value="{{ post.area or '' }}"></div>
-  <div>本文: <input name="caption" value="{{ post.caption or '' }}"></div>
-  <div>価格帯: <input name="price_range" value="{{ post.price_range or '' }}"></div>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div>店名: <input name="store_name" value="{{ post.store_name }}" required></div>
+  <div>地域: <input name="area" value="{{ post.area or '' }}" required></div>
+  <div>本文: <input name="caption" value="{{ post.caption or '' }}" required></div>
+  <div>価格帯: <input name="price_range" value="{{ post.price_range or '' }}" required></div>
   <div>学校: <input name="school" value="{{ post.school or '' }}"></div>
   <div>Google Maps URL: <input name="google_maps_url" value="{{ post.google_maps_url or '' }}" size="80"
        placeholder="https://www.google.com/maps/..." ></div>
