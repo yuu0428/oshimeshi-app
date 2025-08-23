@@ -9,18 +9,6 @@
     <script>
         // CSRF トークンをグローバルに利用可能にする
         window.csrf_token = "{{ csrf_token() }}";
-        
-        // モバイルデバッグ用（一時的）
-        console.log('Page loaded on device:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop');
-        console.log('User Agent:', navigator.userAgent);
-        console.log('CSRF Token loaded:', window.csrf_token ? 'Yes' : 'No');
-        
-        // ネットワーク状態をチェック
-        if (navigator.onLine) {
-            console.log('Network status: Online');
-        } else {
-            console.log('Network status: Offline');
-        }
     </script>
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <meta name="googlebot" content="noindex, nofollow">

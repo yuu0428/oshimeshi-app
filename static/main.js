@@ -442,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    
     // 投稿詳細をモーダルで表示
     function showPostDetail(cardElement) {
         const modal = document.getElementById('postDetailModal');

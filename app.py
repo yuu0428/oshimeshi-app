@@ -1253,14 +1253,11 @@ if not app.debug and os.environ.get('FLASK_ENV') == 'production':
         'font-src': "'self' fonts.gstatic.com",
         'img-src': "'self' data: *.supabase.co",
     }
-    # Permissions-Policyヘッダーでbrowsing-topicsエラーを修正
+    # Permissions-Policyヘッダーのエラーを回避
     Talisman(app, 
         force_https=True, 
         content_security_policy=csp,
-        permissions_policy={
-            'browsing-topics': '()',  # browsing-topicsを無効化
-            'interest-cohort': '()'   # FLoCも無効化
-        }
+        permissions_policy={}  # 空にしてPermissions-Policyエラーを回避
     )
 
 
