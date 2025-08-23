@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, current_app, ab
 from urllib.parse import quote, urlparse
 import io, csv, hmac, hashlib
 from datetime import datetime
-from models import db, Post, User
+from models import db, Post, User, Like
 
 tracking_ad_bp = Blueprint("tracking_ad", __name__, template_folder="templates")
 
@@ -172,6 +172,90 @@ def export_coupon_events():
     return Response(buf.getvalue().encode("utf-8-sig"),
                     mimetype="text/csv",
                     headers={"Content-Disposition":'attachment; filename="coupon_events.csv"'})
+
+@tracking_ad_bp.route("/admin/export/posts.csv")
+def export_posts():
+    admin_required()
+    from datetime import timezone, timedelta
+    
+    # JST タイムゾーンを定義
+    JST = timezone(timedelta(hours=9))
+    
+    # 投稿データとライク数を取得
+    q = (
+        db.session.query(
+            Post.id,
+            Post.created_at,
+            Post.area,
+            Post.price_range,
+            Post.school,
+            Post.user_id,
+            Post.google_maps_url,
+            db.func.count(db.distinct(Like.id)).label('like_count')
+        )
+        .outerjoin(Like, Post.id == Like.post_id)
+        .group_by(Post.id, Post.created_at, Post.area, Post.price_range, Post.school, Post.user_id, Post.google_maps_url)
+        .order_by(Post.created_at.desc())
+    ).all()
+    
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["post_id", "created_at", "area", "price_band", "school", "is_ad", "like_count"])
+    
+    # 広告アカウントIDを取得
+    adv_id = current_app.config.get("ADVERTISER_USER_ID", 1)
+    
+    for r in q:
+        # JST変換（YYYY-MM-DD形式）
+        jst_date = r.created_at.replace(tzinfo=timezone.utc).astimezone(JST).strftime('%Y-%m-%d')
+        
+        # is_ad判定（投稿者ID=1 または MapsURLあり）
+        is_ad = (r.user_id == adv_id) or bool(r.google_maps_url)
+        
+        # schoolが空の場合は空文字
+        school = r.school or ""
+        
+        w.writerow([
+            r.id,
+            jst_date,
+            r.area or "",
+            r.price_range or "",
+            school,
+            str(is_ad).lower(),  # true/false
+            r.like_count
+        ])
+    
+    return Response(buf.getvalue().encode("utf-8-sig"),
+                    mimetype="text/csv",
+                    headers={"Content-Disposition": 'attachment; filename="posts.csv"'})
+
+@tracking_ad_bp.route("/admin/export/likes.csv")
+def export_likes():
+    admin_required()
+    from datetime import timezone, timedelta
+    
+    # JST タイムゾーンを定義
+    JST = timezone(timedelta(hours=9))
+    
+    # ライクデータを取得（個人識別子は除外）
+    q = (
+        db.session.query(Like.post_id, Like.created_at)
+        .order_by(Like.created_at.desc())
+    ).all()
+    
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["post_id", "created_at"])
+    
+    for r in q:
+        # JST変換（YYYY-MM-DD形式）
+        jst_date = r.created_at.replace(tzinfo=timezone.utc).astimezone(JST).strftime('%Y-%m-%d')
+        
+        w.writerow([r.post_id, jst_date])
+    
+    return Response(buf.getvalue().encode("utf-8-sig"),
+                    mimetype="text/csv",
+                    headers={"Content-Disposition": 'attachment; filename="likes.csv"'})
 
 # --- データリセット ---
 @tracking_ad_bp.route("/admin/reset_coupon_data", methods=["POST"])

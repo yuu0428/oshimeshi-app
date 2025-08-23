@@ -83,6 +83,8 @@
         <button onclick="checkErrors()">⚠️ エラー確認</button>
         <button onclick="adminLogin()">🔐 管理者ログイン</button>
         <button onclick="fixDatabase()">🔧 DB修正</button>
+        <button onclick="downloadPosts()">📊 投稿CSV</button>
+        <button onclick="downloadLikes()">❤️ ライクCSV</button>
         <button onclick="reloadPage()">🔄 リロード</button>
         <button onclick="goToHome()">🏠 ホーム</button>
     </div>
@@ -263,6 +265,18 @@
             .catch(error => {
                 console.error('DB修正エラー:', error);
             });
+        }
+        
+        function downloadPosts() {
+            console.info('投稿CSV取得中...');
+            window.open('/admin/export/posts.csv', '_blank');
+            console.log('投稿CSVダウンロードを開始しました');
+        }
+        
+        function downloadLikes() {
+            console.info('ライクCSV取得中...');
+            window.open('/admin/export/likes.csv', '_blank');
+            console.log('ライクCSVダウンロードを開始しました');
         }
         
         // エラーをキャッチ
