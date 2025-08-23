@@ -15,16 +15,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, true);
     
-    // CSRFトークン取得関数
+    // CSRFトークン取得関数（モバイル対応強化）
     function getCSRFToken() {
-        if (window.csrf_token) {
+        // 優先順位1: window.csrf_token
+        if (window.csrf_token && window.csrf_token.trim() !== '') {
             return window.csrf_token;
         }
+        
+        // 優先順位2: meta tag
         const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        if (metaToken) {
+        if (metaToken && metaToken.trim() !== '') {
             return metaToken;
         }
-        console.warn('CSRFトークンが見つかりません');
+        
+        // 優先順位3: 既存のフォーム内のトークン
+        const existingToken = document.querySelector('input[name="csrf_token"]')?.value;
+        if (existingToken && existingToken.trim() !== '') {
+            return existingToken;
+        }
+        
+        // 優先順位4: cookieから取得（モバイル用fallback）
+        const cookieToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrf_token='))
+            ?.split('=')[1];
+        if (cookieToken && cookieToken.trim() !== '') {
+            return decodeURIComponent(cookieToken);
+        }
+        
+        console.warn('CSRFトークンが見つかりません - ページを更新してください');
         return '';
     }
     
@@ -954,34 +973,80 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // 最小限のフォーム処理
+    // 最小限のフォーム処理（モバイル対応強化）
     function initializeMinimalForms() {
-        // CSRFトークンの確認のみ
+        // CSRFトークンの確認とモバイル向け最適化
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) {
                     e.preventDefault();
-                    alert('セキュリティトークンが見つかりません。ページを更新してください。');
+                    
+                    // モバイルでは日本語メッセージでユーザーフレンドリーに
+                    if (isMobileDevice()) {
+                        alert('認証情報が見つかりません。\nページを更新してもう一度お試しください。');
+                        // モバイルでは自動でページを更新
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('セキュリティトークンが見つかりません。ページを更新してください。');
+                    }
                     return false;
                 }
                 
-                // CSRFトークンをフォームに追加
+                // CSRFトークンをフォームに追加または更新
                 let csrfInput = form.querySelector('input[name="csrf_token"]');
                 if (!csrfInput) {
                     csrfInput = document.createElement('input');
                     csrfInput.type = 'hidden';
                     csrfInput.name = 'csrf_token';
-                    csrfInput.value = csrfToken;
                     form.appendChild(csrfInput);
+                }
+                csrfInput.value = csrfToken;
+                
+                // モバイルでは送信前に少し遅延を入れる（安定性向上）
+                if (isMobileDevice() && !form.classList.contains('mobile-optimized')) {
+                    e.preventDefault();
+                    form.classList.add('mobile-optimized');
+                    
+                    // ローディング表示
+                    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitBtn) {
+                        const originalText = submitBtn.textContent || submitBtn.value;
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = '送信中...';
+                        
+                        setTimeout(() => {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = originalText;
+                            }
+                        }, 3000); // 3秒後にタイムアウト
+                    }
+                    
+                    setTimeout(() => {
+                        form.submit();
+                    }, 200); // 200ms遅延
+                    return false;
                 }
             });
         });
         
         // モバイルデバイスの場合、select要素の自動送信を無効化
-        if (window.innerWidth <= 768) {
+        if (isMobileDevice()) {
             document.querySelectorAll('select[onchange]').forEach(select => {
                 select.removeAttribute('onchange');
+                
+                // モバイル用の手動送信ボタンを追加
+                if (!select.nextElementSibling?.classList?.contains('mobile-submit-btn')) {
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'submit';
+                    submitBtn.textContent = '検索';
+                    submitBtn.className = 'mobile-submit-btn';
+                    submitBtn.style.marginLeft = '10px';
+                    select.parentNode.insertBefore(submitBtn, select.nextSibling);
+                }
             });
         }
     }

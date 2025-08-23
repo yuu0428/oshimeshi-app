@@ -54,10 +54,15 @@ def get_supabase_client():
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_timeout': 30,
-    'pool_recycle': 3600,
+    'pool_timeout': 60,  # モバイル回線を考慮して60秒に延長
+    'pool_recycle': 1800,  # 30分に短縮してコネクション更新を頻繁に
+    'pool_pre_ping': True,  # 接続前にpingで確認
+    'pool_size': 10,  # 接続プールサイズを明示的に設定
+    'max_overflow': 20,  # 最大オーバーフロー接続数
     'connect_args': {
-        'client_encoding': 'utf8'
+        'client_encoding': 'utf8',
+        'connect_timeout': 30,  # 接続タイムアウトを30秒に設定
+        'options': '-c statement_timeout=30000'  # クエリタイムアウトを30秒に設定
     }
 }
 
@@ -400,9 +405,16 @@ def is_uptimerobot_request():
     
     return False
 
+def is_mobile_device():
+    """モバイルデバイスかどうかを判定"""
+    user_agent = request.headers.get('User-Agent', '').lower()
+    mobile_agents = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
+    return any(agent in user_agent for agent in mobile_agents)
+
 @app.before_request
 def load_logged_in_user():
     from flask import g
+    import time
     
     # UptimeRobotからのアクセスの場合、ユーザーを作成しない
     if is_uptimerobot_request():
@@ -422,34 +434,55 @@ def load_logged_in_user():
                 session.clear()
                 user_id = None
         except SQLAlchemyError as e:
-            print(f"Error loading user: {e}")
+            app.logger.error(f"Error loading user {user_id}: {e}")
             session.clear()
             user_id = None
 
     if user_id is None:
-        username = generate_random_username()
-        try:
-            # 重複チェック
-            existing_user = User.query.filter_by(username=username).first()
-            if existing_user:
-                username = f"{username} {random.randint(1000, 9999)}"
-            
-            new_user = User(
-                username=username,
-                gender=None
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            
-            session['user_id'] = new_user.id
-            session['username'] = username
-            g.user = new_user
-            
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            print(f"Error creating new user: {e}")
-            g.user = None
-            flash('ユーザー情報の作成に失敗しました。ページを更新してお試しください。', 'error')
+        # モバイルデバイスの場合、より慎重にユーザー作成
+        max_retries = 3 if is_mobile_device() else 1
+        
+        for attempt in range(max_retries):
+            try:
+                # 一意なユーザー名を生成（より確実な方法）
+                base_username = generate_random_username()
+                timestamp = int(time.time() * 1000) % 10000
+                username = f"{base_username} {timestamp}"
+                
+                # より厳密な重複チェック
+                retry_count = 0
+                while User.query.filter_by(username=username).first() and retry_count < 5:
+                    timestamp = int(time.time() * 1000) % 10000
+                    username = f"{base_username} {timestamp}"
+                    retry_count += 1
+                
+                new_user = User(
+                    username=username,
+                    gender=None
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                
+                session['user_id'] = new_user.id
+                session['username'] = username
+                g.user = new_user
+                
+                app.logger.info(f"New user created: {new_user.id} ({username}) - Attempt {attempt + 1}")
+                return
+                
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                app.logger.warning(f"User creation attempt {attempt + 1} failed: {e}")
+                
+                if attempt == max_retries - 1:
+                    # 最後の試行でも失敗した場合
+                    app.logger.error(f"Failed to create user after {max_retries} attempts: {e}")
+                    g.user = None
+                    if not is_mobile_device():  # モバイルではフラッシュメッセージを控えめに
+                        flash('ユーザー情報の作成に失敗しました。ページを更新してお試しください。', 'error')
+                else:
+                    # 短時間待機してリトライ
+                    time.sleep(0.1 * (attempt + 1))
 
 
 def allowed_file(filename):
@@ -507,8 +540,11 @@ def index():
 
         return render_template('index.html', posts=posts_query, liked_posts=liked_posts_ids)
     except SQLAlchemyError as e:
-        print(f"Database error in index: {e}")
-        flash('データの取得中にエラーが発生しました。', 'error')
+        app.logger.error(f"Database error in index: {e} - User Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        error_message = 'データの取得中にエラーが発生しました。'
+        if is_mobile_device():
+            error_message = 'データの読み込みに失敗しました。ネットワーク接続を確認して再読み込みしてください。'
+        flash(error_message, 'error')
         return render_template('index.html', posts=[], liked_posts=set())
 
 
@@ -675,8 +711,11 @@ def search():
             results = query.group_by(Post.id, User.username).order_by(desc(Post.created_at)).all()
             
         except SQLAlchemyError as e:
-            print(f"Database error in search: {e}")
-            flash('検索中にエラーが発生しました。', 'error')
+            app.logger.error(f"Database error in search: {e} - User Agent: {request.headers.get('User-Agent', 'Unknown')}")
+            error_message = '検索中にエラーが発生しました。'
+            if is_mobile_device():
+                error_message = '検索に失敗しました。ネットワーク接続を確認して再試行してください。'
+            flash(error_message, 'error')
 
     liked_posts_ids = set()
     if user_id and results:
@@ -720,8 +759,11 @@ def account():
         
         return render_template('account.html', posts=posts_query, username=username, is_admin=is_admin)
     except SQLAlchemyError as e:
-        print(f"Database error in account: {e}")
-        flash('アカウント情報の取得中にエラーが発生しました。', 'error')
+        app.logger.error(f"Database error in account: {e} - User Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        error_message = 'アカウント情報の取得中にエラーが発生しました。'
+        if is_mobile_device():
+            error_message = 'アカウント情報の読み込みに失敗しました。ネットワーク接続を確認してください。'
+        flash(error_message, 'error')
         return render_template('account.html', posts=[], username=username, is_admin=is_admin)
 
 @app.route('/admin_login', methods=['POST'])
@@ -1100,8 +1142,11 @@ def ranking():
                              schools_with_posts=schools_with_posts,
                              page_title=page_title)
     except SQLAlchemyError as e:
-        print(f"Database error in ranking: {e}")
-        flash('ランキングの取得中にエラーが発生しました。', 'error')
+        app.logger.error(f"Database error in ranking: {e} - User Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        error_message = 'ランキングの取得中にエラーが発生しました。'
+        if is_mobile_device():
+            error_message = 'ランキング情報の読み込みに失敗しました。ネットワーク接続を確認してください。'
+        flash(error_message, 'error')
         return render_template('ranking.html', 
                              posts=[], 
                              liked_posts=set(), 
@@ -1148,8 +1193,11 @@ def advertisements():
                              liked_posts=liked_posts_ids, 
                              is_admin=is_admin)
     except SQLAlchemyError as e:
-        print(f"Database error in advertisements: {e}")
-        flash('広告一覧の取得中にエラーが発生しました。', 'error')
+        app.logger.error(f"Database error in advertisements: {e} - User Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        error_message = '広告一覧の取得中にエラーが発生しました。'
+        if is_mobile_device():
+            error_message = '広告情報の読み込みに失敗しました。ネットワーク接続を確認してください。'
+        flash(error_message, 'error')
         return render_template('advertisements.html', 
                              posts=[], 
                              liked_posts=set(), 
