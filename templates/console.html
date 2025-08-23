@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>📱 モバイル コンソール</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .header {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .console-output {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+            font-size: 11px;
+            word-wrap: break-word;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-error { color: #ff4444; }
+        .log-warn { color: #ffaa00; }
+        .log-info { color: #4488ff; }
+        .log-debug { color: #888; }
+        .timestamp { color: #666; font-size: 10px; }
+        .controls {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        button:active { background: #555; }
+        .status {
+            background: #002200;
+            border: 1px solid #004400;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 推しメシ モバイルコンソール</h1>
+        <div class="status" id="status">ロード中...</div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="clearConsole()">🗑️ クリア</button>
+        <button onclick="testConnection()">🔗 接続テスト</button>
+        <button onclick="checkErrors()">⚠️ エラー確認</button>
+        <button onclick="reloadPage()">🔄 リロード</button>
+        <button onclick="goToHome()">🏠 ホーム</button>
+    </div>
+    
+    <div class="console-output" id="console-output"></div>
+
+    <script>
+        let logs = [];
+        
+        // 元のconsoleメソッドを保存
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn,
+            info: console.info,
+            debug: console.debug
+        };
+        
+        function addLog(level, args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = Array.from(args).map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            logs.push({ level, message, timestamp });
+            updateDisplay();
+            
+            // 元のconsoleも呼び出す
+            originalConsole[level].apply(console, args);
+        }
+        
+        // console メソッドをオーバーライド
+        console.log = (...args) => addLog('log', args);
+        console.error = (...args) => addLog('error', args);
+        console.warn = (...args) => addLog('warn', args);
+        console.info = (...args) => addLog('info', args);
+        console.debug = (...args) => addLog('debug', args);
+        
+        function updateDisplay() {
+            const output = document.getElementById('console-output');
+            output.innerHTML = logs.map(log => 
+                `<div class="log-entry log-${log.level}">
+                    <span class="timestamp">${log.timestamp}</span> 
+                    <span class="log-level">[${log.level.toUpperCase()}]</span> 
+                    ${log.message}
+                </div>`
+            ).join('');
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearConsole() {
+            logs = [];
+            updateDisplay();
+        }
+        
+        function testConnection() {
+            console.info('接続テスト開始...');
+            fetch('/health')
+                .then(response => {
+                    console.log('ヘルスチェック結果:', response.status);
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('レスポンス:', data);
+                })
+                .catch(error => {
+                    console.error('接続エラー:', error);
+                });
+        }
+        
+        function checkErrors() {
+            console.info('JavaScript エラーチェック中...');
+            
+            // User Agent情報
+            console.log('User Agent:', navigator.userAgent);
+            
+            // ネットワーク状態
+            console.log('オンライン状態:', navigator.onLine);
+            
+            // CSRFトークン確認
+            console.log('CSRFトークン:', window.csrf_token ? 'あり' : 'なし');
+            
+            // 画面サイズ
+            console.log('画面サイズ:', window.innerWidth + 'x' + window.innerHeight);
+            
+            // ローカルストレージ
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                console.log('ローカルストレージ: 利用可能');
+            } catch(e) {
+                console.error('ローカルストレージ: 利用不可', e);
+            }
+        }
+        
+        function reloadPage() {
+            window.location.reload();
+        }
+        
+        function goToHome() {
+            window.location.href = '/';
+        }
+        
+        // エラーをキャッチ
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error || e.message);
+            console.error('ファイル:', e.filename, '行:', e.lineno);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Promise Rejection:', e.reason);
+        });
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            const status = document.getElementById('status');
+            status.textContent = `準備完了 - ${navigator.userAgent.includes('Mobile') ? 'モバイル' : 'デスクトップ'}`;
+            
+            console.info('モバイルコンソール初期化完了');
+            checkErrors();
+        });
+    </script>
+</body>
+</html>

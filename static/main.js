@@ -527,7 +527,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('投稿詳細モーダルの表示に失敗しました:', error);
         }
-    }
 
         // タッチデバイス対応
         if ('ontouchstart' in window) {
@@ -551,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showPostDetail(card);
             });
         }
-    }
+    } // initializePostDetailModal 関数の終了
 
     // 公式情報モーダル初期化
     function initializeOfficialInfoModal() {

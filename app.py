@@ -1323,6 +1323,11 @@ def mobile_debug():
     app.logger.info(f"Mobile Debug Request: {debug_info}")
     return jsonify(debug_info)
 
+@app.route('/console')
+def mobile_console():
+    """スマホ用コンソール画面"""
+    return render_template('console.html')
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
