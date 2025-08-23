@@ -81,6 +81,7 @@
         <button onclick="clearConsole()">🗑️ クリア</button>
         <button onclick="testConnection()">🔗 接続テスト</button>
         <button onclick="checkErrors()">⚠️ エラー確認</button>
+        <button onclick="adminLogin()">🔐 管理者ログイン</button>
         <button onclick="fixDatabase()">🔧 DB修正</button>
         <button onclick="reloadPage()">🔄 リロード</button>
         <button onclick="goToHome()">🏠 ホーム</button>
@@ -191,6 +192,46 @@
             window.location.href = '/';
         }
         
+        function adminLogin() {
+            const password = prompt('管理者パスワードを入力してください:');
+            if (!password) {
+                console.warn('パスワードが入力されませんでした');
+                return;
+            }
+            
+            console.info('管理者ログイン中...');
+            
+            // フォームデータを作成
+            const formData = new FormData();
+            formData.append('admin_password', password);
+            formData.append('csrf_token', window.csrf_token || '');
+            
+            fetch('/admin_login', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('管理者ログインレスポンス:', response.status);
+                if (response.ok) {
+                    console.info('✅ 管理者ログイン成功！');
+                    return 'success';
+                } else {
+                    return response.text();
+                }
+            })
+            .then(data => {
+                if (data === 'success') {
+                    console.info('管理者権限でログインしました。DB修正を実行してください。');
+                } else {
+                    console.error('❌ 管理者ログイン失敗:', data);
+                }
+            })
+            .catch(error => {
+                console.error('管理者ログインエラー:', error);
+            });
+        }
+        
         function fixDatabase() {
             console.info('データベース修正を実行中...');
             fetch('/admin/fix-db', {
@@ -214,6 +255,9 @@
                     }, 2000);
                 } else {
                     console.error('❌ データベース修正失敗:', data);
+                    if (data.includes('Unauthorized')) {
+                        console.warn('💡 先に「🔐 管理者ログイン」を実行してください');
+                    }
                 }
             })
             .catch(error => {
