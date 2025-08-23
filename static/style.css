@@ -73,7 +73,11 @@ nav {
 @media (max-width: 768px) {
     nav {
         height: 80px; /* モバイルでは少し高く */
-        z-index: 1; /* z-indexを下げる */
+        z-index: 999; /* z-indexを元に戻す - ナビゲーションが隠れないように */
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
     }
 }
 

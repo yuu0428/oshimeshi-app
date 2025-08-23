@@ -411,6 +411,20 @@ def is_mobile_device():
     mobile_agents = ['mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone']
     return any(agent in user_agent for agent in mobile_agents)
 
+def log_request_details():
+    """リクエストの詳細をログに記録（モバイル問題調査用）"""
+    if is_mobile_device():
+        app.logger.info(f"Mobile Request: {request.method} {request.path}")
+        app.logger.info(f"User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+        app.logger.info(f"Remote Addr: {request.remote_addr}")
+        app.logger.info(f"Headers: {dict(request.headers)}")
+        if request.args:
+            app.logger.info(f"Args: {dict(request.args)}")
+        if request.form:
+            app.logger.info(f"Form: {dict(request.form)}")
+        return True
+    return False
+
 @app.before_request
 def load_logged_in_user():
     from flask import g
@@ -420,6 +434,11 @@ def load_logged_in_user():
     if is_uptimerobot_request():
         g.user = None
         return
+    
+    # モバイルアクセス時の詳細ログ
+    if is_mobile_device():
+        app.logger.info(f"Mobile before_request: {request.method} {request.path}")
+        app.logger.info(f"Session data: {dict(session)}")
     
     user_id = session.get('user_id')
 
@@ -512,6 +531,9 @@ def validate_required_fields(**kwargs):
 # --- ルーティング ---
 @app.route('/')
 def index():
+    # モバイルデバッグ用ログ
+    log_request_details()
+    
     current_user_id = session.get('user_id')
 
     try:
@@ -1275,6 +1297,26 @@ def health_check():
         return 'OK', 200
     except Exception:
         return 'ERROR', 500
+
+@app.route('/mobile-debug')
+def mobile_debug():
+    """モバイル接続問題調査用エンドポイント"""
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    is_mobile = is_mobile_device()
+    
+    debug_info = {
+        'user_agent': user_agent,
+        'is_mobile': is_mobile,
+        'headers': dict(request.headers),
+        'session_id': session.get('user_id', 'None'),
+        'csrf_token': generate_csrf(),
+        'request_method': request.method,
+        'remote_addr': request.remote_addr,
+        'path': request.path
+    }
+    
+    app.logger.info(f"Mobile Debug Request: {debug_info}")
+    return jsonify(debug_info)
 
 if __name__ == '__main__':
     import os
