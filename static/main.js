@@ -528,27 +528,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // タッチデバイス対応
-    if ('ontouchstart' in window) {
-        container.addEventListener('touchend', function(e) {
-            // タッチイベントでも同じ処理
-            const card = e.target.closest('.post-card');
-            if (!card) return;
-        
-            if (e.target.closest('.like-button, .delete-button, .delete-form, form')) {
-                return;
-            }
-        
-            e.preventDefault();
-        
-            // ダブルタップ防止
-            if (card.dataset.lastTap && Date.now() - card.dataset.lastTap < 500) {
-                return;
-            }
-            card.dataset.lastTap = Date.now();
-        
-            showPostDetail(card);
-        });
+        // タッチデバイス対応
+        if ('ontouchstart' in window) {
+            container.addEventListener('touchend', function(e) {
+                // タッチイベントでも同じ処理
+                const card = e.target.closest('.post-card');
+                if (!card) return;
+            
+                if (e.target.closest('.like-button, .delete-button, .delete-form, form')) {
+                    return;
+                }
+            
+                e.preventDefault();
+            
+                // ダブルタップ防止
+                if (card.dataset.lastTap && Date.now() - card.dataset.lastTap < 500) {
+                    return;
+                }
+                card.dataset.lastTap = Date.now();
+            
+                showPostDetail(card);
+            });
+        }
     }
 
     // 公式情報モーダル初期化
