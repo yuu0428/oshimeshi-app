@@ -81,6 +81,7 @@
         <button onclick="clearConsole()">🗑️ クリア</button>
         <button onclick="testConnection()">🔗 接続テスト</button>
         <button onclick="checkErrors()">⚠️ エラー確認</button>
+        <button onclick="fixDatabase()">🔧 DB修正</button>
         <button onclick="reloadPage()">🔄 リロード</button>
         <button onclick="goToHome()">🏠 ホーム</button>
     </div>
@@ -188,6 +189,36 @@
         
         function goToHome() {
             window.location.href = '/';
+        }
+        
+        function fixDatabase() {
+            console.info('データベース修正を実行中...');
+            fetch('/admin/fix-db', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.csrf_token || ''
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('DB修正レスポンス:', response.status);
+                return response.text();
+            })
+            .then(data => {
+                console.log('DB修正結果:', data);
+                if (data.includes('successfully')) {
+                    console.info('✅ データベース修正完了！ページを再読み込みしてください。');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    console.error('❌ データベース修正失敗:', data);
+                }
+            })
+            .catch(error => {
+                console.error('DB修正エラー:', error);
+            });
         }
         
         // エラーをキャッチ

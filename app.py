@@ -1326,6 +1326,62 @@ def mobile_debug():
     app.logger.info(f"Mobile Debug Request: {debug_info}")
     return jsonify(debug_info)
 
+@app.route('/admin/fix-db', methods=['POST'])
+def fix_database_schema():
+    """データベーススキーマ修正用エンドポイント（管理者のみ）"""
+    if not session.get('is_admin'):
+        return 'Unauthorized', 403
+    
+    try:
+        # coupon_eventsテーブルのuser_idカラム追加
+        db.session.execute(text("""
+            ALTER TABLE coupon_events 
+            ADD COLUMN IF NOT EXISTS user_id INTEGER;
+        """))
+        
+        # 外部キー制約を追加
+        db.session.execute(text("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.table_constraints 
+                    WHERE constraint_name = 'coupon_events_user_id_fkey'
+                    AND table_name = 'coupon_events'
+                ) THEN
+                    ALTER TABLE coupon_events 
+                    ADD CONSTRAINT coupon_events_user_id_fkey 
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+                END IF;
+            END $$;
+        """))
+        
+        # インデックス作成
+        db.session.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_coupon_events_user_id ON coupon_events(user_id);
+        """))
+        
+        # 既存レコードのuser_idを設定
+        db.session.execute(text("""
+            UPDATE coupon_events 
+            SET user_id = 1 
+            WHERE user_id IS NULL;
+        """))
+        
+        # NOT NULL制約を追加
+        db.session.execute(text("""
+            ALTER TABLE coupon_events 
+            ALTER COLUMN user_id SET NOT NULL;
+        """))
+        
+        db.session.commit()
+        app.logger.info("Database schema fixed successfully")
+        return 'Database schema fixed successfully', 200
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Database schema fix failed: {e}")
+        return f'Database schema fix failed: {e}', 500
+
 @app.route('/console')
 def mobile_console():
     """スマホ用コンソール画面"""
