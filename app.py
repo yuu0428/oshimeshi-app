@@ -1261,7 +1261,7 @@ if not app.debug and os.environ.get('FLASK_ENV') == 'production':
     )
 
 
-# 環境に応じたセッション設定
+# 環境に応じたセッション設定（モバイル対応改善）
 if app.debug or os.environ.get('FLASK_ENV') != 'production':
     # 開発環境
     app.config['SESSION_COOKIE_SECURE'] = False  # HTTPでも動作
@@ -1269,12 +1269,15 @@ else:
     # 本番環境
     app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS必須
 
-
+# モバイルブラウザ対応のセッション設定
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-# セッションクッキーの有効期限を延長（ブラウザが削除されるまで保持）
-app.config['SESSION_COOKIE_MAX_AGE'] = None  # ブラウザセッション終了まで保持
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3650)  # セッション有効期限を10年に延長
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # モバイルで問題が少ない設定
+app.config['SESSION_COOKIE_MAX_AGE'] = timedelta(days=30)  # 30日間有効
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # セッション有効期限を30日に変更
+
+# CSRFトークンの設定を強化
+app.config['WTF_CSRF_TIME_LIMIT'] = None  # CSRFトークンの時間制限を無効化
+app.config['WTF_CSRF_SSL_STRICT'] = False  # モバイルでの SSL 厳格モードを無効化
 
 # セッションを永続化する設定
 @app.before_request

@@ -3,7 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>📱 モバイル コンソール</title>
+    <script>
+        // CSRFトークンをグローバル変数として設定
+        window.csrf_token = "{{ csrf_token() }}";
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -157,6 +162,12 @@
             
             // CSRFトークン確認
             console.log('CSRFトークン:', window.csrf_token ? 'あり' : 'なし');
+            console.log('window.csrf_token値:', window.csrf_token);
+            
+            // meta tagからも確認
+            const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            console.log('metaタグCSRFトークン:', metaToken ? 'あり' : 'なし');
+            console.log('metaタグCSRF値:', metaToken);
             
             // 画面サイズ
             console.log('画面サイズ:', window.innerWidth + 'x' + window.innerHeight);
